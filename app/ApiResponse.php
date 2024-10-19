@@ -3,28 +3,20 @@
 namespace App;
 use Illuminate\Http\JsonResponse;
 
-class ApiResponse
+class ApiResponse extends JsonResponse
 {
-    /**
-     * Create a new class instance.
-     */
-    public function __construct()
+    public static function success(string $message = 'Success', int $status = 200, mixed $data = []): JsonResponse
     {
-        //
-    }
-
-    public static function success($data = [], $message = 'Success', $status = 200): JsonResponse
-    {
-        return response()->json([
+        return new self([
             'status' => 'success',
             'message' => $message,
             'data' => $data
         ], $status);
     }
 
-    public static function error($message = 'Something went wrong', $status = 400, $errors = []): JsonResponse
+    public static function error(string $message = 'Something went wrong', int $status = 400, array $errors = []): JsonResponse
     {
-        return response()->json([
+        return new self([
             'status' => 'error',
             'message' => $message,
             'errors' => $errors

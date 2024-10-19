@@ -7,62 +7,87 @@ use App\Http\Requests\AuthLoginRequest;
 use App\Http\Requests\AuthRegisterRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-class AuthController extends Controller
+class AuthController extends BaseController
 {
     public function register(AuthRegisterRequest $request): JsonResponse
     {
         try {
+            DB::beginTransaction();
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);
 
-            return ApiResponse::success(
-                [
-                    'user' => $user
-                ],
-                'Registration success',
-                201
-            );
+            DB::commit();
+
+            return ApiResponse::success('Registered successfully', 201);
 
         } catch (\Exception $e) {
-            return ApiResponse::error('Registration failed', 500);
+            DB::rollBack();
+            return ApiResponse::error(
+                'Failed to register',
+                500,
+                [$e->getMessage()]
+            );
         }
     }
 
     public function login(AuthLoginRequest $request): JsonResponse
     {
         try {
+            DB::beginTransaction();
+
             $request->authenticate();
             $token = auth()->user()->createToken('auth-token')->plainTextToken;
 
-            return ApiResponse::success(
-                [
-                    'token' => $token,
-                    'token_type' => 'Bearer'
-                ],
-                'Login success'
-            );
+            DB::commit();
+
+            return ApiResponse::success('Logged in successfully', 200, [
+                'token' => $token,
+                'token_type' => 'Bearer'
+            ]);
+
         } catch (ValidationException $e) {
-            return ApiResponse::error('Invalid credentials', 401, $e->errors());
+            return ApiResponse::error(
+                'Invalid credentials',
+                401,
+                $e->errors()
+            );
+
         } catch (\Exception $e) {
-            return ApiResponse::error('Login failed', 500);
+            DB::rollBack();
+            return ApiResponse::error(
+                'Failed to login',
+                500,
+                [$e->getMessage()]
+            );
         }
     }
 
-    public function logout(Request $request): JsonResponse
+    public function logout(): JsonResponse
     {
         try {
+            DB::beginTransaction();
+
             auth()->user()->tokens()->delete();
-            return ApiResponse::success([], 'Logout success');
+
+            DB::commit();
+
+            return ApiResponse::success('Logged out successfully', 200);
+
         } catch (\Exception $e) {
-            return ApiResponse::error('Logout failed', 500);
+            DB::rollBack();
+            return ApiResponse::error(
+                'Failed to logout',
+                500,
+                [$e->getMessage()]
+            );
         }
     }
 }
