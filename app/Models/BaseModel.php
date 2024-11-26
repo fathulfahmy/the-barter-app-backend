@@ -10,4 +10,9 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class BaseModel extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
+
+    protected $casts = [
+        'amount' => 'float',
+        'rating' => 'float',
+    ];
 }
