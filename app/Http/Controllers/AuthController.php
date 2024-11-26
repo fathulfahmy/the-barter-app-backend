@@ -90,4 +90,13 @@ class AuthController extends BaseController
             );
         }
     }
+
+    public function user(): JsonResponse
+    {
+        return ApiResponse::success(
+            'Fetched authenticated user successfully',
+            200,
+            auth()->user()
+        );
+    }
 }

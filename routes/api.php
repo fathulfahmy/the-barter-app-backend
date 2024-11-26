@@ -1,21 +1,28 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BarterCategoryController;
 use App\Http\Controllers\BarterInvoiceController;
 use App\Http\Controllers\BarterReviewController;
 use App\Http\Controllers\BarterServiceController;
 use App\Http\Controllers\BarterTransactionController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('register', [AuthController::class, 'register'])
-    ->name('api.register');
+Route::prefix('auth')->group(function () {
+    Route::post('register', [AuthController::class, 'register'])
+        ->name('api.auth.register');
 
-Route::post('login', [AuthController::class, 'login'])
-    ->name('api.login');
+    Route::post('login', [AuthController::class, 'login'])
+        ->name('api.auth.login');
 
-Route::post('logout', [AuthController::class, 'logout'])
-    ->middleware('auth:sanctum')
-    ->name('api.logout');
+    Route::post('logout', [AuthController::class, 'logout'])
+        ->middleware('auth:sanctum')
+        ->name('api.auth.logout');
+
+    Route::get('user', [AuthController::class, 'user'])
+        ->middleware('auth:sanctum')
+        ->name('api.auth.user');
+});
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -53,4 +60,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('{id}', [BarterReviewController::class, 'destroy'])->name('api.barter_reviews.destroy');
     });
 
+    Route::prefix('barter_categories')->group(function () {
+        Route::get('', [BarterCategoryController::class, 'index'])->name('api.barter_categories.index');
+        Route::get('names', [BarterCategoryController::class, 'names'])->name('api.barter_categories.names');
+    });
 });
