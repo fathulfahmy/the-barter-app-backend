@@ -48,7 +48,6 @@ class BarterInvoiceController extends BaseController
             $validated['barter_acquirer_id'] = auth()->id();
             $barter_invoice = BarterInvoice::create($validated);
 
-            // TODO: add barter_services
             if (!empty($validated['barter_service_ids'])) {
                 $barter_invoice->barter_services()->attach($validated['barter_service_ids']);
             }
@@ -82,7 +81,6 @@ class BarterInvoiceController extends BaseController
             $validated = $request->validated();
             $barter_invoice->update($validated);
 
-            // TODO: add barter_services
             if (!empty($validated['barter_service_ids'])) {
                 $barter_invoice->barter_services()->sync($validated['barter_service_ids']);
             }
