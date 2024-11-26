@@ -28,8 +28,7 @@ class BarterServiceFactory extends Factory
             'barter_category_id' => fake()->numberBetween(1, 10),
             'title' => fake()->sentence(),
             'description' => fake()->paragraph(),
-            'min_price' => $min_price,
-            'max_price' => $max_price,
+            'price' => 'RM' . $min_price . ' to ' . 'RM' . $max_price,
             'rating' => fake()->randomFloat(1, 1, 5),
             'status' => fake()->randomElement($status),
         ];

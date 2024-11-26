@@ -17,8 +17,7 @@ class BarterService extends BaseModel
         'barter_category_id',
         'title',
         'description',
-        'min_price',
-        'max_price',
+        'price',
         'rating',
         'status',
     ];
