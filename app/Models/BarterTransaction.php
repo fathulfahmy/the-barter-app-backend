@@ -31,7 +31,7 @@ class BarterTransaction extends BaseModel
 
     public function barter_service(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'barter_service_id');
+        return $this->belongsTo(BarterService::class, 'barter_service_id');
     }
 
     public function barter_invoice(): HasOne
