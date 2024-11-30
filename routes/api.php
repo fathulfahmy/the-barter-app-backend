@@ -19,9 +19,9 @@ Route::prefix('auth')->group(function () {
         ->middleware('auth:sanctum')
         ->name('api.auth.logout');
 
-    Route::get('user', [AuthController::class, 'user'])
+    Route::get('me', [AuthController::class, 'me'])
         ->middleware('auth:sanctum')
-        ->name('api.auth.user');
+        ->name('api.auth.me');
 });
 
 Route::middleware('auth:sanctum')->group(function () {

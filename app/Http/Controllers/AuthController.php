@@ -26,7 +26,14 @@ class AuthController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success('Registered successfully', 201);
+            $request->authenticate();
+            $token = $user->createToken('auth-token')->plainTextToken;
+
+            return ApiResponse::success('Registered successfully', 201, [
+                'token' => $token,
+                'token_type' => 'Bearer',
+                'user' => auth()->user()->load('barter_services'),
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -50,7 +57,8 @@ class AuthController extends BaseController
 
             return ApiResponse::success('Logged in successfully', 200, [
                 'token' => $token,
-                'token_type' => 'Bearer'
+                'token_type' => 'Bearer',
+                'user' => auth()->user()->load('barter_services'),
             ]);
 
         } catch (ValidationException $e) {
@@ -91,12 +99,12 @@ class AuthController extends BaseController
         }
     }
 
-    public function user(): JsonResponse
+    public function me(): JsonResponse
     {
         return ApiResponse::success(
             'Fetched authenticated user successfully',
             200,
-            auth()->user()
+            auth()->user()->load('barter_services')
         );
     }
 }
