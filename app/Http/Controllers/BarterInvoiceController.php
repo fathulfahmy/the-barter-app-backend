@@ -15,7 +15,7 @@ class BarterInvoiceController extends BaseController
     {
         $barter_invoices = BarterInvoice::with('barter_transaction', 'barter_services')
             ->where('barter_acquirer_id', auth()->id())
-            ->paginate(10);
+            ->paginate(config('app.default.pagination'));
 
         return ApiResponse::success(
             'Invoices fetched successfully',

@@ -14,7 +14,7 @@ class BarterServiceController extends BaseController
     public function acquire(): JsonResponse
     {
         $barter_services = BarterService::with('barter_provider', 'barter_category')
-            ->paginate(10);
+            ->paginate(config('app.default.pagination'));
 
         return ApiResponse::success(
             'Services fetched successfully',
@@ -27,7 +27,7 @@ class BarterServiceController extends BaseController
     {
         $barter_services = BarterService::with('barter_category')
             ->where('barter_provider_id', auth()->id())
-            ->paginate(10);
+            ->paginate(config('app.default.pagination'));
 
         return ApiResponse::success(
             'Services fetched successfully',

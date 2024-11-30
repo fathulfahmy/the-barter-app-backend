@@ -17,7 +17,7 @@ class BarterTransactionController extends BaseController
         $barter_transactions = BarterTransaction::with('barter_acquirer', 'barter_provider', 'barter_service')
             ->where('barter_provider_id', auth()->id())
             ->where('status', 'pending')
-            ->paginate(10);
+            ->paginate(config('app.default.pagination'));
 
         return ApiResponse::success(
             'Requests fetched successfully',
@@ -31,7 +31,7 @@ class BarterTransactionController extends BaseController
         $barter_transactions = BarterTransaction::with('barter_acquirer', 'barter_provider', 'barter_service')
             ->where('barter_provider_id', auth()->id())
             ->whereNot('status', 'pending')
-            ->paginate(10);
+            ->paginate(config('app.default.pagination'));
 
         return ApiResponse::success(
             'Records fetched successfully',

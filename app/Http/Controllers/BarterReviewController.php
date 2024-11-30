@@ -16,7 +16,7 @@ class BarterReviewController extends BaseController
     {
         $barter_reviews = BarterReview::with('barter_service', 'barter_transaction')
             ->where('author_id', auth()->id())
-            ->paginate(10);
+            ->paginate(config('app.default.pagination'));
 
         return ApiResponse::success(
             'Reviews fetched successfully',
