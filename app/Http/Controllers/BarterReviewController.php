@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\ApiResponse;
 use App\Http\Requests\BarterReviewStoreRequest;
 use App\Http\Requests\BarterReviewUpdateRequest;
@@ -14,7 +15,7 @@ class BarterReviewController extends BaseController
 {
     public function index(): JsonResponse
     {
-        $barter_reviews = BarterReview::with('barter_service', 'barter_transaction')
+        $barter_reviews = BarterReview::with('author', 'barter_service', 'barter_transaction.barter_invoice')
             ->where('author_id', auth()->id())
             ->paginate(config('app.default.pagination'));
 
@@ -25,11 +26,11 @@ class BarterReviewController extends BaseController
         );
     }
 
-    public function show($id): JsonResponse
+    public function show($barter_review_id): JsonResponse
     {
-        $barter_review = BarterReview::with('barter_service', 'barter_transaction')->find($id);
+        $barter_review = BarterReview::with('author', 'barter_service', 'barter_transaction.barter_invoice')->find($barter_review_id);
 
-        if (!isset($barter_review)) {
+        if (! isset($barter_review)) {
             throw (new \Exception('Review does not exist'));
         }
 
@@ -50,7 +51,7 @@ class BarterReviewController extends BaseController
 
             $barter_transaction = BarterTransaction::find($validated['barter_transaction_id']);
 
-            if (!isset($barter_transaction)) {
+            if (! isset($barter_transaction)) {
                 throw (new \Exception('Transaction does not exist'));
             }
 
@@ -64,6 +65,7 @@ class BarterReviewController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to create review',
                 500,
@@ -72,13 +74,13 @@ class BarterReviewController extends BaseController
         }
     }
 
-    public function update(BarterReviewUpdateRequest $request, $id): JsonResponse
+    public function update(BarterReviewUpdateRequest $request, $barter_review_id): JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            $barter_review = BarterReview::find($id);
-            if (!isset($barter_review)) {
+            $barter_review = BarterReview::find($barter_review_id);
+            if (! isset($barter_review)) {
                 throw (new \Exception('Review does not exist'));
             }
 
@@ -93,6 +95,7 @@ class BarterReviewController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to update review',
                 500,
@@ -101,13 +104,13 @@ class BarterReviewController extends BaseController
         }
     }
 
-    public function destroy($id): JsonResponse
+    public function destroy($barter_review_id): JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            $barter_review = BarterReview::find($id);
-            if (!isset($barter_review)) {
+            $barter_review = BarterReview::find($barter_review_id);
+            if (! isset($barter_review)) {
                 throw (new \Exception('Review does not exist'));
             }
 
@@ -121,6 +124,7 @@ class BarterReviewController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to delete review',
                 500,

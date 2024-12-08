@@ -19,6 +19,8 @@ class BarterInvoice extends BaseModel
         'status',
     ];
 
+    protected $appends = ['exchanged_services'];
+
     public function barter_acquirer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'barter_acquirer_id');
@@ -32,5 +34,10 @@ class BarterInvoice extends BaseModel
     public function barter_services(): BelongsToMany
     {
         return $this->belongsToMany(BarterService::class)->using(BarterInvoiceBarterService::class);
+    }
+
+    public function getExchangedServicesAttribute()
+    {
+        return $this->barter_services->pluck('title');
     }
 }

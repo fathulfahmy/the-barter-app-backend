@@ -37,6 +37,7 @@ class AuthController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to register',
                 500,
@@ -70,6 +71,7 @@ class AuthController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to login',
                 500,
@@ -91,6 +93,7 @@ class AuthController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to logout',
                 500,

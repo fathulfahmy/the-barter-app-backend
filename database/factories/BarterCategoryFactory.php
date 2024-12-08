@@ -17,7 +17,7 @@ class BarterCategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->jobTitle(),
+            'name' => fake()->words(2, true),
         ];
     }
 }

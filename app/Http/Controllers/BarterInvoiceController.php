@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\ApiResponse;
 use App\Http\Requests\BarterInvoiceStoreRequest;
 use App\Http\Requests\BarterInvoiceUpdateRequest;
@@ -13,7 +14,7 @@ class BarterInvoiceController extends BaseController
 {
     public function index(): JsonResponse
     {
-        $barter_invoices = BarterInvoice::with('barter_transaction', 'barter_services')
+        $barter_invoices = BarterInvoice::with('barter_transaction.barter_service', 'barter_transaction.barter_acquirer', 'barter_services')
             ->where('barter_acquirer_id', auth()->id())
             ->paginate(config('app.default.pagination'));
 
@@ -24,11 +25,11 @@ class BarterInvoiceController extends BaseController
         );
     }
 
-    public function show($id): JsonResponse
+    public function show($barter_invoice_id): JsonResponse
     {
-        $barter_invoice = BarterInvoice::with('barter_transaction', 'barter_services')->find($id);
+        $barter_invoice = BarterInvoice::with('barter_transaction.barter_service', 'barter_transaction.barter_acquirer', 'barter_transaction.barter_provider', 'barter_services')->find($barter_invoice_id);
 
-        if (!isset($barter_invoice)) {
+        if (! isset($barter_invoice)) {
             throw (new \Exception('Invoice does not exist'));
         }
 
@@ -48,7 +49,7 @@ class BarterInvoiceController extends BaseController
             $validated['barter_acquirer_id'] = auth()->id();
             $barter_invoice = BarterInvoice::create($validated);
 
-            if (!empty($validated['barter_service_ids'])) {
+            if (! empty($validated['barter_service_ids'])) {
                 $barter_invoice->barter_services()->attach($validated['barter_service_ids']);
             }
 
@@ -58,6 +59,7 @@ class BarterInvoiceController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to create invoice',
                 500,
@@ -66,13 +68,13 @@ class BarterInvoiceController extends BaseController
         }
     }
 
-    public function update(BarterInvoiceUpdateRequest $request, $id): JsonResponse
+    public function update(BarterInvoiceUpdateRequest $request, $barter_invoice_id): JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            $barter_invoice = BarterInvoice::find($id);
-            if (!isset($barter_invoice)) {
+            $barter_invoice = BarterInvoice::find($barter_invoice_id);
+            if (! isset($barter_invoice)) {
                 throw (new \Exception('Invoice does not exist'));
             }
 
@@ -81,7 +83,7 @@ class BarterInvoiceController extends BaseController
             $validated = $request->validated();
             $barter_invoice->update($validated);
 
-            if (!empty($validated['barter_service_ids'])) {
+            if (! empty($validated['barter_service_ids'])) {
                 $barter_invoice->barter_services()->sync($validated['barter_service_ids']);
             }
 
@@ -91,6 +93,7 @@ class BarterInvoiceController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to update invoice',
                 500,
@@ -99,13 +102,13 @@ class BarterInvoiceController extends BaseController
         }
     }
 
-    public function destroy($id): JsonResponse
+    public function destroy($barter_invoice_id): JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            $barter_invoice = BarterInvoice::find($id);
-            if (!isset($barter_invoice)) {
+            $barter_invoice = BarterInvoice::find($barter_invoice_id);
+            if (! isset($barter_invoice)) {
                 throw (new \Exception('Invoice does not exist'));
             }
 
@@ -119,6 +122,7 @@ class BarterInvoiceController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to delete invoice',
                 500,

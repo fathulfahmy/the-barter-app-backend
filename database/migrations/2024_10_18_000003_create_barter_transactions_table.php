@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreign('barter_acquirer_id')->references('id')->on('users');
             $table->foreign('barter_provider_id')->references('id')->on('users');
             $table->foreign('barter_service_id')->references('id')->on('barter_services');
-            $table->decimal('amount', 10, 2);
-            $table->string('status')->default('pending');
+            $table->decimal('amount', 10, 2)->default(0);
+            $table->enum('status', ['pending', 'accepted', 'rejected', 'completed', 'cancelled'])->default('pending');
             $table->timestamps();
         });
     }

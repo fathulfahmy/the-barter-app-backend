@@ -19,16 +19,18 @@ class BarterServiceFactory extends Factory
         $min_price = fake()->randomFloat(2, 0, 99);
         $max_price = fake()->randomFloat(2, $min_price, 99);
         $status = [
-            'active',
-            'inactive',
+            'enabled',
+            'disabled',
         ];
 
         return [
             'barter_provider_id' => fake()->numberBetween(1, 10),
             'barter_category_id' => fake()->numberBetween(1, 10),
-            'title' => fake()->sentence(),
+            'title' => fake()->jobTitle(),
             'description' => fake()->paragraph(),
-            'price' => 'RM' . $min_price . ' to ' . 'RM' . $max_price,
+            'min_price' => $min_price,
+            'max_price' => $max_price,
+            'price_unit' => fake()->word(),
             'rating' => fake()->randomFloat(1, 1, 5),
             'status' => fake()->randomElement($status),
         ];

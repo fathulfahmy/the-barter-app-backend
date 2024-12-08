@@ -18,8 +18,10 @@ class BarterInvoiceFactory extends Factory
     {
         $status = [
             'pending',
-            'success',
-            'failed',
+            'accepted',
+            'rejected',
+            // 'success',
+            // 'failed',
         ];
 
         return [

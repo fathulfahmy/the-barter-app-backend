@@ -73,6 +73,6 @@ class User extends Authenticatable implements HasMedia
 
     public function barter_reviews(): HasMany
     {
-        return $this->hasMany(BarterReview::class,'author_id');
+        return $this->hasMany(BarterReview::class, 'author_id');
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 namespace App;
+
 use Illuminate\Http\JsonResponse;
 
 class ApiResponse extends JsonResponse
@@ -10,7 +11,7 @@ class ApiResponse extends JsonResponse
         return new self([
             'success' => true,
             'message' => $message,
-            'data' => $data
+            'data' => $data,
         ], $status);
     }
 
@@ -19,7 +20,7 @@ class ApiResponse extends JsonResponse
         return new self([
             'success' => false,
             'message' => $message,
-            'errors' => $errors
+            'errors' => $errors,
         ], $status);
     }
 }

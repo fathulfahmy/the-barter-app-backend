@@ -2,10 +2,8 @@
 
 namespace App\Policies;
 
-use App\ApiResponse;
 use App\Models\BarterService;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class BarterServicePolicy
 {

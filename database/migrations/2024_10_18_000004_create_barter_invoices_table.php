@@ -17,8 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('barter_transaction_id');
             $table->foreign('barter_acquirer_id')->references('id')->on('users');
             $table->foreign('barter_transaction_id')->references('id')->on('barter_transactions');
-            $table->decimal('amount', 10, 2);
-            $table->string('status')->default('pending');
+            $table->decimal('amount', 10, 2)->default(0);
+            $table->enum('status', ['pending', 'accepted', 'rejected', 'success', 'failed'])->default('pending');
             $table->timestamps();
         });
     }

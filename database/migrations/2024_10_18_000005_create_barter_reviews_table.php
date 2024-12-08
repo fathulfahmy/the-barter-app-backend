@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreign('barter_service_id')->references('id')->on('barter_services');
             $table->foreign('barter_transaction_id')->references('id')->on('barter_transactions');
             $table->text('description');
-            $table->decimal('rating', 2, 1);
+            $table->decimal('rating', 2, 1)->default(0);
             $table->timestamps();
         });
     }

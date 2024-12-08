@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\ApiResponse;
 use App\Http\Requests\BarterServiceStoreRequest;
 use App\Http\Requests\BarterServiceUpdateRequest;
@@ -14,6 +15,8 @@ class BarterServiceController extends BaseController
     public function acquire(): JsonResponse
     {
         $barter_services = BarterService::with('barter_provider', 'barter_category')
+            ->whereNot('barter_provider_id', auth()->id())
+            ->where('status', 'enabled')
             ->paginate(config('app.default.pagination'));
 
         return ApiResponse::success(
@@ -36,14 +39,13 @@ class BarterServiceController extends BaseController
         );
     }
 
-    public function show($id): JsonResponse
+    public function show($barter_service_id): JsonResponse
     {
-        $barter_service = BarterService::with('barter_provider', 'barter_category')->find($id);
+        $barter_service = BarterService::with('barter_provider', 'barter_category')->find($barter_service_id);
 
-        if (!isset($barter_service)) {
+        if (! isset($barter_service)) {
             throw (new \Exception('Service does not exist'));
         }
-
 
         return ApiResponse::success(
             'Service detail fetched successfully',
@@ -67,6 +69,7 @@ class BarterServiceController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to create service',
                 500,
@@ -75,13 +78,13 @@ class BarterServiceController extends BaseController
         }
     }
 
-    public function update(BarterServiceUpdateRequest $request, $id): JsonResponse
+    public function update(BarterServiceUpdateRequest $request, $barter_service_id): JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            $barter_service = BarterService::find($id);
-            if (!isset($barter_service)) {
+            $barter_service = BarterService::find($barter_service_id);
+            if (! isset($barter_service)) {
                 throw (new \Exception('Service does not exist'));
             }
 
@@ -96,6 +99,7 @@ class BarterServiceController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to update service',
                 500,
@@ -104,13 +108,13 @@ class BarterServiceController extends BaseController
         }
     }
 
-    public function destroy($id): JsonResponse
+    public function destroy($barter_service_id): JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            $barter_service = BarterService::find($id);
-            if (!isset($barter_service)) {
+            $barter_service = BarterService::find($barter_service_id);
+            if (! isset($barter_service)) {
                 throw (new \Exception('Service does not exist'));
             }
 
@@ -124,6 +128,7 @@ class BarterServiceController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to delete service',
                 500,

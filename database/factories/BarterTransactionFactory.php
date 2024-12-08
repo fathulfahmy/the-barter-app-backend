@@ -18,8 +18,10 @@ class BarterTransactionFactory extends Factory
     {
         $status = [
             'pending',
-            'success',
-            'failed',
+            'accepted',
+            'rejected',
+            'completed',
+            'cancelled',
         ];
 
         return [

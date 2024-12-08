@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\ApiResponse;
 use App\Http\Requests\BarterTransactionStoreRequest;
 use App\Http\Requests\BarterTransactionUpdateRequest;
@@ -12,10 +13,10 @@ use Illuminate\Support\Facades\Gate;
 
 class BarterTransactionController extends BaseController
 {
-    public function requests(): JsonResponse
+    public function requests($barter_service_id): JsonResponse
     {
-        $barter_transactions = BarterTransaction::with('barter_acquirer', 'barter_provider', 'barter_service')
-            ->where('barter_provider_id', auth()->id())
+        $barter_transactions = BarterTransaction::with('barter_acquirer', 'barter_service', 'barter_invoice')
+            ->where('barter_service_id', $barter_service_id)
             ->where('status', 'pending')
             ->paginate(config('app.default.pagination'));
 
@@ -26,11 +27,10 @@ class BarterTransactionController extends BaseController
         );
     }
 
-    public function records(): JsonResponse
+    public function records($barter_service_id): JsonResponse
     {
-        $barter_transactions = BarterTransaction::with('barter_acquirer', 'barter_provider', 'barter_service')
-            ->where('barter_provider_id', auth()->id())
-            ->whereNot('status', 'pending')
+        $barter_transactions = BarterTransaction::with('barter_acquirer', 'barter_service', 'barter_invoice')
+            ->where('barter_service_id', $barter_service_id)
             ->paginate(config('app.default.pagination'));
 
         return ApiResponse::success(
@@ -40,11 +40,11 @@ class BarterTransactionController extends BaseController
         );
     }
 
-    public function show($id): JsonResponse
+    public function show($barter_transaction_id): JsonResponse
     {
-        $barter_transaction = BarterTransaction::with('barter_acquirer', 'barter_provider', 'barter_service')->find($id);
+        $barter_transaction = BarterTransaction::with('barter_acquirer', 'barter_service', 'barter_invoice')->find($barter_transaction_id);
 
-        if (!isset($barter_transaction)) {
+        if (! isset($barter_transaction)) {
             throw (new \Exception('Transaction does not exist'));
         }
 
@@ -65,7 +65,7 @@ class BarterTransactionController extends BaseController
 
             $barter_service = BarterService::find($validated['barter_service_id']);
 
-            if (!isset($barter_service)) {
+            if (! isset($barter_service)) {
                 throw (new \Exception('Service does not exist'));
             }
 
@@ -79,6 +79,7 @@ class BarterTransactionController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to create transaction',
                 500,
@@ -87,13 +88,13 @@ class BarterTransactionController extends BaseController
         }
     }
 
-    public function update(BarterTransactionUpdateRequest $request, $id): JsonResponse
+    public function update(BarterTransactionUpdateRequest $request, $barter_transaction_id): JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            $barter_transaction = BarterTransaction::find($id);
-            if (!isset($barter_transaction)) {
+            $barter_transaction = BarterTransaction::find($barter_transaction_id);
+            if (! isset($barter_transaction)) {
                 throw (new \Exception('Transaction does not exist'));
             }
 
@@ -108,6 +109,7 @@ class BarterTransactionController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to update transaction',
                 500,
@@ -116,13 +118,13 @@ class BarterTransactionController extends BaseController
         }
     }
 
-    public function destroy($id): JsonResponse
+    public function destroy($barter_transaction_id): JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            $barter_transaction = BarterTransaction::find($id);
-            if (!isset($barter_transaction)) {
+            $barter_transaction = BarterTransaction::find($barter_transaction_id);
+            if (! isset($barter_transaction)) {
                 throw (new \Exception('Transaction does not exist'));
             }
 
@@ -136,6 +138,7 @@ class BarterTransactionController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return ApiResponse::error(
                 'Failed to delete transaction',
                 500,

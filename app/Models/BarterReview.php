@@ -26,11 +26,11 @@ class BarterReview extends BaseModel
 
     public function barter_service(): BelongsTo
     {
-        return $this->belongsTo(BarterService::class,'barter_service_id');
+        return $this->belongsTo(BarterService::class, 'barter_service_id');
     }
 
     public function barter_transaction(): BelongsTo
     {
-        return $this->belongsTo(BarterTransaction::class,'barter_transaction_id');
+        return $this->belongsTo(BarterTransaction::class, 'barter_transaction_id');
     }
 }
