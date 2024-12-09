@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -19,7 +18,6 @@ return new class extends Migration
             $table->foreign('barter_acquirer_id')->references('id')->on('users');
             $table->foreign('barter_provider_id')->references('id')->on('users');
             $table->foreign('barter_service_id')->references('id')->on('barter_services');
-            $table->decimal('amount', 10, 2)->default(0);
             $table->enum('status', ['pending', 'accepted', 'rejected', 'completed', 'cancelled'])->default('pending');
             $table->timestamps();
         });

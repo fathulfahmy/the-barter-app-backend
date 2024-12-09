@@ -16,7 +16,6 @@ class BarterTransaction extends BaseModel
         'barter_acquirer_id',
         'barter_provider_id',
         'barter_service_id',
-        'amount',
         'status',
     ];
 

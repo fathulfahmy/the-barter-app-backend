@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->seedUsers(10);
         $this->seedBarterCategories(10);
         $this->seedBarterServices(5);
-        $this->seedBarterTransactions(5000);
+        $this->seedBarterTransactions(1000);
     }
 
     protected function seedUsers(int $count): void

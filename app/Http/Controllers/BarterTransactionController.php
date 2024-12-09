@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\ApiResponse;
 use App\Http\Requests\BarterTransactionStoreRequest;
 use App\Http\Requests\BarterTransactionUpdateRequest;
+use App\Models\BarterInvoice;
 use App\Models\BarterService;
 use App\Models\BarterTransaction;
 use Illuminate\Http\JsonResponse;
@@ -44,7 +45,7 @@ class BarterTransactionController extends BaseController
     {
         $barter_transaction = BarterTransaction::with('barter_acquirer', 'barter_service', 'barter_invoice')->find($barter_transaction_id);
 
-        if (! isset($barter_transaction)) {
+        if (!isset($barter_transaction)) {
             throw (new \Exception('Transaction does not exist'));
         }
 
@@ -61,17 +62,29 @@ class BarterTransactionController extends BaseController
             DB::beginTransaction();
 
             $validated = $request->validated();
-            $validated['barter_acquirer_id'] = auth()->id();
+            $barter_acquirer_id = auth()->id();
 
             $barter_service = BarterService::find($validated['barter_service_id']);
 
-            if (! isset($barter_service)) {
+            if (!isset($barter_service)) {
                 throw (new \Exception('Service does not exist'));
             }
 
-            $validated['barter_provider_id'] = $barter_service->barter_provider_id;
+            $barter_transaction = BarterTransaction::create([
+                'barter_acquirer_id' => $barter_acquirer_id,
+                'barter_provider_id' => $barter_service->barter_provider_id,
+                'barter_service_id' => $validated['barter_service_id'],
+            ]);
 
-            BarterTransaction::create($validated);
+            $barter_invoice = BarterInvoice::create([
+                'barter_acquirer_id' => $barter_acquirer_id,
+                'barter_transaction_id' => $barter_transaction->id,
+                'amount' => $validated['amount'] ?? 0,
+            ]);
+
+            if (!empty($validated['barter_service_ids'])) {
+                $barter_invoice->barter_services()->attach($validated['barter_service_ids']);
+            }
 
             DB::commit();
 
@@ -94,7 +107,7 @@ class BarterTransactionController extends BaseController
             DB::beginTransaction();
 
             $barter_transaction = BarterTransaction::find($barter_transaction_id);
-            if (! isset($barter_transaction)) {
+            if (!isset($barter_transaction)) {
                 throw (new \Exception('Transaction does not exist'));
             }
 
@@ -124,7 +137,7 @@ class BarterTransactionController extends BaseController
             DB::beginTransaction();
 
             $barter_transaction = BarterTransaction::find($barter_transaction_id);
-            if (! isset($barter_transaction)) {
+            if (!isset($barter_transaction)) {
                 throw (new \Exception('Transaction does not exist'));
             }
 

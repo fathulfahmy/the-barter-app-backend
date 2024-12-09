@@ -28,7 +28,6 @@ class BarterTransactionFactory extends Factory
             'barter_acquirer_id' => fake()->numberBetween(1, 10),
             'barter_provider_id' => fake()->numberBetween(1, 10),
             'barter_service_id' => fake()->numberBetween(1, 50),
-            'amount' => fake()->randomFloat(2, 1, 99),
             'status' => fake()->randomElement($status),
         ];
     }
