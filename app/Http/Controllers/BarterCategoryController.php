@@ -17,15 +17,4 @@ class BarterCategoryController extends BaseController
             $barter_categories,
         );
     }
-
-    public function names()
-    {
-        $names = BarterCategory::pluck('name');
-
-        return ApiResponse::success(
-            'Category names fetched successfully',
-            200,
-            $names,
-        );
-    }
 }

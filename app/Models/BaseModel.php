@@ -12,6 +12,7 @@ class BaseModel extends Model implements HasMedia
     use HasFactory, InteractsWithMedia;
 
     protected $casts = [
+        'id' => 'string',
         'min_price' => 'float',
         'max_price' => 'float',
         'amount' => 'float',

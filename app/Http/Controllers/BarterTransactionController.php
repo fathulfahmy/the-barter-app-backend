@@ -9,35 +9,60 @@ use App\Models\BarterInvoice;
 use App\Models\BarterService;
 use App\Models\BarterTransaction;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class BarterTransactionController extends BaseController
 {
-    public function requests($barter_service_id): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $barter_transactions = BarterTransaction::with('barter_acquirer', 'barter_service', 'barter_invoice')
-            ->where('barter_service_id', $barter_service_id)
-            ->where('status', 'pending')
+        $mode = $request->input('mode');
+        $barter_service_id = $request->input('barter_service_id');
+
+        $query = BarterTransaction::with('barter_acquirer', 'barter_provider', 'barter_service', 'barter_invoice');
+
+        if ($barter_service_id) {
+            $query->where('barter_service_id', $barter_service_id);
+        }
+
+        switch ($mode) {
+            case 'incoming':
+                $query->where('barter_provider_id', auth()->id())
+                    ->where('status', 'pending');
+                break;
+
+            case 'outgoing':
+                $query->where('barter_acquirer_id', auth()->id())
+                    ->where('status', 'pending');
+                break;
+
+            case 'ongoing':
+                $query->where(function ($q) {
+                    $q->where('barter_acquirer_id', auth()->id())
+                        ->orWhere('barter_provider_id', auth()->id());
+                })->where('status', 'accepted');
+                break;
+
+            case 'history':
+                $query->where(function ($q) {
+                    $q->where('barter_acquirer_id', auth()->id())
+                        ->orWhere('barter_provider_id', auth()->id());
+                })->whereIn('status', ['rejected', 'cancelled', 'completed'])
+                    ->with('barter_reviews');
+                break;
+
+            default:
+                return ApiResponse::error('Invalid transaction mode', 400);
+        }
+
+        $barter_transactions = $query->orderBy('updated_at', 'desc')
             ->paginate(config('app.default.pagination'));
 
         return ApiResponse::success(
-            'Requests fetched successfully',
+            'Transactions fetched successfully',
             200,
-            $barter_transactions,
-        );
-    }
-
-    public function records($barter_service_id): JsonResponse
-    {
-        $barter_transactions = BarterTransaction::with('barter_acquirer', 'barter_service', 'barter_invoice')
-            ->where('barter_service_id', $barter_service_id)
-            ->paginate(config('app.default.pagination'));
-
-        return ApiResponse::success(
-            'Records fetched successfully',
-            200,
-            $barter_transactions,
+            $barter_transactions
         );
     }
 
@@ -88,7 +113,11 @@ class BarterTransactionController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success('Transaction created successfully', 201);
+            return ApiResponse::success(
+                'Transaction created successfully',
+                201,
+                $barter_transaction
+            );
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -118,7 +147,11 @@ class BarterTransactionController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success('Transaction updated successfully', 200);
+            return ApiResponse::success(
+                'Transaction updated successfully',
+                200,
+                $barter_transaction
+            );
 
         } catch (\Exception $e) {
             DB::rollBack();

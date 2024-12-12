@@ -55,7 +55,11 @@ class BarterInvoiceController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success('Invoice created successfully', 201);
+            return ApiResponse::success(
+                'Invoice created successfully',
+                201,
+                $barter_invoice
+            );
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -89,7 +93,11 @@ class BarterInvoiceController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success('Invoice updated successfully', 200);
+            return ApiResponse::success(
+                'Invoice updated successfully',
+                200,
+                $barter_invoice
+            );
 
         } catch (\Exception $e) {
             DB::rollBack();

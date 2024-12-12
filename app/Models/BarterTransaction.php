@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class BarterTransaction extends BaseModel
@@ -39,8 +40,8 @@ class BarterTransaction extends BaseModel
         return $this->hasOne(BarterInvoice::class, 'barter_transaction_id');
     }
 
-    public function barter_review(): HasOne
+    public function barter_reviews(): HasMany
     {
-        return $this->hasOne(BarterReview::class, 'barter_transaction_id');
+        return $this->hasMany(BarterReview::class, 'barter_transaction_id');
     }
 }

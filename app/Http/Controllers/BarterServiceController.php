@@ -7,17 +7,37 @@ use App\Http\Requests\BarterServiceStoreRequest;
 use App\Http\Requests\BarterServiceUpdateRequest;
 use App\Models\BarterService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class BarterServiceController extends BaseController
 {
-    public function acquire(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $barter_services = BarterService::with('barter_provider', 'barter_category')
-            ->whereNot('barter_provider_id', auth()->id())
-            ->where('status', 'enabled')
-            ->paginate(config('app.default.pagination'));
+        $mode = $request->input('mode');
+
+        $query = BarterService::query();
+
+        switch ($mode) {
+            case 'acquire':
+                $query->with('barter_provider', 'barter_category')
+                    ->whereNot('barter_provider_id', auth()->id())
+                    ->where('status', 'enabled')
+                    ->inRandomOrder();
+                break;
+
+            case 'provide':
+                $query->with('barter_category')
+                    ->where('barter_provider_id', auth()->id())
+                    ->orderBy('title');
+                break;
+
+            default:
+                return ApiResponse::error('Invalid service mode', 400);
+        }
+
+        $barter_services = $query->paginate(config('app.default.pagination'));
 
         return ApiResponse::success(
             'Services fetched successfully',
@@ -25,25 +45,11 @@ class BarterServiceController extends BaseController
             $barter_services,
         );
     }
-
-    public function provide(): JsonResponse
-    {
-        $barter_services = BarterService::with('barter_category')
-            ->where('barter_provider_id', auth()->id())
-            ->paginate(config('app.default.pagination'));
-
-        return ApiResponse::success(
-            'Services fetched successfully',
-            200,
-            $barter_services,
-        );
-    }
-
     public function show($barter_service_id): JsonResponse
     {
         $barter_service = BarterService::with('barter_provider', 'barter_category')->find($barter_service_id);
 
-        if (! isset($barter_service)) {
+        if (!isset($barter_service)) {
             throw (new \Exception('Service does not exist'));
         }
 
@@ -61,11 +67,15 @@ class BarterServiceController extends BaseController
 
             $validated = $request->validated();
             $validated['barter_provider_id'] = auth()->id();
-            BarterService::create($validated);
+            $barter_service = BarterService::create($validated);
 
             DB::commit();
 
-            return ApiResponse::success('Service created successfully', 201);
+            return ApiResponse::success(
+                'Service created successfully',
+                201,
+                $barter_service
+            );
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -84,7 +94,7 @@ class BarterServiceController extends BaseController
             DB::beginTransaction();
 
             $barter_service = BarterService::find($barter_service_id);
-            if (! isset($barter_service)) {
+            if (!isset($barter_service)) {
                 throw (new \Exception('Service does not exist'));
             }
 
@@ -95,7 +105,11 @@ class BarterServiceController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success('Service updated successfully', 200);
+            return ApiResponse::success(
+                'Service updated successfully',
+                200,
+                $barter_service
+            );
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -114,7 +128,7 @@ class BarterServiceController extends BaseController
             DB::beginTransaction();
 
             $barter_service = BarterService::find($barter_service_id);
-            if (! isset($barter_service)) {
+            if (!isset($barter_service)) {
                 throw (new \Exception('Service does not exist'));
             }
 

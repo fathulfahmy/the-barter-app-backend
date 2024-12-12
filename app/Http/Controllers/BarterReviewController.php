@@ -57,11 +57,15 @@ class BarterReviewController extends BaseController
 
             $validated['barter_service_id'] = $barter_transaction->barter_service_id;
 
-            BarterReview::create($validated);
+            $barter_review = BarterReview::create($validated);
 
             DB::commit();
 
-            return ApiResponse::success('Review created successfully', 201);
+            return ApiResponse::success(
+                'Review created successfully',
+                201,
+                $barter_review
+            );
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -91,7 +95,11 @@ class BarterReviewController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success('Review updated successfully', 200);
+            return ApiResponse::success(
+                'Review updated successfully',
+                200,
+                $barter_review
+            );
 
         } catch (\Exception $e) {
             DB::rollBack();

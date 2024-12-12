@@ -21,9 +21,9 @@ class BarterInvoiceStoreRequest extends BaseRequest
     {
         return [
             'barter_transaction_id' => 'required|exists:barter_transactions,id',
-            'amount' => 'nullable|numeric|min:0|max:99999999.99|required_without_all:barter_service_ids',
-            'barter_service_ids' => 'nullable|array|required_without_all:amount',
-            'barter_service_ids.*' => 'integer|exists:barter_services,id',
+            'amount' => 'nullable|numeric|min:0|max:99999999.99|required_without:barter_service_ids',
+            'barter_service_ids' => 'nullable|array|required_without:amount',
+            'barter_service_ids.*' => 'exists:barter_services,id',
         ];
     }
 }
