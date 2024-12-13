@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BarterReview extends BaseModel
 {
+    use SoftDeletes;
+
     /**
      * The attributes that are mass assignable.
      *

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->text('description');
             $table->decimal('rating', 2, 1)->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

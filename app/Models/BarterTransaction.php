@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BarterTransaction extends BaseModel
 {
+    use SoftDeletes;
+
     /**
      * The attributes that are mass assignable.
      *

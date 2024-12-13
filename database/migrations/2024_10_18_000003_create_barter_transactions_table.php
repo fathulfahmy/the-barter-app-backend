@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreign('barter_service_id')->references('id')->on('barter_services');
             $table->enum('status', ['pending', 'accepted', 'rejected', 'completed', 'cancelled'])->default('pending');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

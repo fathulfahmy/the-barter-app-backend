@@ -3,19 +3,16 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class User extends Authenticatable implements HasMedia
+class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, InteractsWithMedia, Notifiable, SoftDeletes;
+    use HasApiTokens, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -51,6 +48,8 @@ class User extends Authenticatable implements HasMedia
         ];
     }
 
+    protected $appends = ['avatar'];
+
     public function barter_services(): HasMany
     {
         return $this->hasMany(BarterService::class, 'barter_provider_id');
@@ -74,5 +73,22 @@ class User extends Authenticatable implements HasMedia
     public function barter_reviews(): HasMany
     {
         return $this->hasMany(BarterReview::class, 'author_id');
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('avatar')->singleFile()
+            ->registerMediaConversions(function (Media $media) {
+                $this
+                    ->addMediaConversion('thumb')
+                    ->width(100)
+                    ->height(100);
+            });
+    }
+
+    protected function getAvatarAttribute()
+    {
+        return $this->getFirstMediaUrl('avatar', 'thumb');
     }
 }
