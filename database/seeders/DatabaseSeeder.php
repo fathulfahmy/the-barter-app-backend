@@ -80,19 +80,20 @@ class DatabaseSeeder extends Seeder
                 $barter_invoice->barter_services()->attach(
                     $user->barter_services->pluck('id')->random(2)
                 );
-
                 if ($barter_transaction->status === 'completed') {
                     BarterReview::factory()->create([
-                        'author_id' => $user->id,
+                        'author_id' => $barter_transaction->barter_acquirer_id,
                         'barter_service_id' => $barter_transaction->barter_service_id,
                         'barter_transaction_id' => $barter_transaction->id,
                     ]);
 
-                    BarterReview::factory()->create([
-                        'author_id' => $barter_service->barter_provider_id,
-                        'barter_service_id' => $barter_transaction->barter_service_id,
-                        'barter_transaction_id' => $barter_transaction->id,
-                    ]);
+                    foreach ($barter_invoice->barter_services as $barter_service) {
+                        BarterReview::factory()->create([
+                            'author_id' => $barter_transaction->barter_provider_id,
+                            'barter_service_id' => $barter_service->id,
+                            'barter_transaction_id' => $barter_transaction->id,
+                        ]);
+                    }
                 }
             }
         }

@@ -59,6 +59,16 @@ class BarterService extends BaseModel
 
     protected function getCompletedCountAttribute(): int
     {
-        return $this->barter_transactions()->where('status', 'completed')->count();
+        $completed_transactions = $this->barter_transactions()
+            ->where('status', 'completed')->count();
+        $completed_invoices = $this->barter_invoices()
+            ->whereHas('barter_transaction', function ($query) {
+                $query->where('status', 'completed');
+            })
+            ->count();
+
+        $result = $completed_transactions + $completed_invoices;
+
+        return $result;
     }
 }

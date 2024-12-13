@@ -8,22 +8,40 @@ use App\Http\Requests\BarterReviewUpdateRequest;
 use App\Models\BarterReview;
 use App\Models\BarterTransaction;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class BarterReviewController extends BaseController
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $barter_reviews = BarterReview::with('author', 'barter_service', 'barter_transaction.barter_invoice')
-            ->where('author_id', auth()->id())
-            ->paginate(config('app.default.pagination'));
+        try {
+            $barter_service_id = $request->input('barter_service_id');
 
-        return ApiResponse::success(
-            'Reviews fetched successfully',
-            200,
-            $barter_reviews,
-        );
+            $query = BarterReview::query()
+                ->with(['author', 'barter_service', 'barter_transaction.barter_invoice'])
+                ->when($barter_service_id, function ($query) use ($barter_service_id) {
+                    $query->where('barter_service_id', $barter_service_id);
+                })
+                ->when(! $barter_service_id, function ($query) {
+                    $query->where('author_id', auth()->id());
+                });
+
+            $barter_reviews = $query->paginate(config('app.default.pagination'));
+
+            return ApiResponse::success(
+                'Reviews fetched successfully',
+                200,
+                $barter_reviews
+            );
+        } catch (\Exception $e) {
+            return ApiResponse::error(
+                'Failed to fetch reviews',
+                500,
+                [$e->getMessage()]
+            );
+        }
     }
 
     public function show($barter_review_id): JsonResponse

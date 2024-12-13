@@ -15,41 +15,48 @@ class BarterServiceController extends BaseController
 {
     public function index(Request $request): JsonResponse
     {
-        $mode = $request->input('mode');
+        try {
+            $mode = $request->input('mode');
 
-        $query = BarterService::query();
-
-        switch ($mode) {
-            case 'acquire':
-                $query->with('barter_provider', 'barter_category')
-                    ->whereNot('barter_provider_id', auth()->id())
-                    ->where('status', 'enabled')
-                    ->inRandomOrder();
-                break;
-
-            case 'provide':
-                $query->with('barter_category')
-                    ->where('barter_provider_id', auth()->id())
-                    ->orderBy('title');
-                break;
-
-            default:
+            if (! in_array($mode, ['acquire', 'provide'])) {
                 return ApiResponse::error('Invalid service mode', 400);
+            }
+
+            $query = BarterService::query()
+                ->when($mode === 'acquire', function ($query) {
+                    $query->with('barter_provider', 'barter_category')
+                        ->whereNot('barter_provider_id', auth()->id())
+                        ->where('status', 'enabled')
+                        ->inRandomOrder();
+                })
+                ->when($mode === 'provide', function ($query) {
+                    $query->with('barter_category')
+                        ->where('barter_provider_id', auth()->id())
+                        ->orderBy('title');
+                });
+
+            $barter_services = $query->paginate(config('app.default.pagination'));
+
+            return ApiResponse::success(
+                'Services fetched successfully',
+                200,
+                $barter_services,
+            );
+
+        } catch (\Exception $e) {
+            return ApiResponse::error(
+                'Failed to fetch services',
+                500,
+                [$e->getMessage()],
+            );
         }
-
-        $barter_services = $query->paginate(config('app.default.pagination'));
-
-        return ApiResponse::success(
-            'Services fetched successfully',
-            200,
-            $barter_services,
-        );
     }
+
     public function show($barter_service_id): JsonResponse
     {
         $barter_service = BarterService::with('barter_provider', 'barter_category')->find($barter_service_id);
 
-        if (!isset($barter_service)) {
+        if (! isset($barter_service)) {
             throw (new \Exception('Service does not exist'));
         }
 
@@ -94,7 +101,7 @@ class BarterServiceController extends BaseController
             DB::beginTransaction();
 
             $barter_service = BarterService::find($barter_service_id);
-            if (!isset($barter_service)) {
+            if (! isset($barter_service)) {
                 throw (new \Exception('Service does not exist'));
             }
 
@@ -128,7 +135,7 @@ class BarterServiceController extends BaseController
             DB::beginTransaction();
 
             $barter_service = BarterService::find($barter_service_id);
-            if (!isset($barter_service)) {
+            if (! isset($barter_service)) {
                 throw (new \Exception('Service does not exist'));
             }
 
