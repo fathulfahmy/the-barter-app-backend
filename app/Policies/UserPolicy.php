@@ -11,7 +11,7 @@ class UserPolicy
      */
     public function update(User $user): bool
     {
-        return $user->id === auth()->id();
+        return $user->id == auth()->id();
     }
 
     /**
@@ -19,6 +19,6 @@ class UserPolicy
      */
     public function delete(User $user): bool
     {
-        return $user->id === auth()->id();
+        return $user->id == auth()->id();
     }
 }

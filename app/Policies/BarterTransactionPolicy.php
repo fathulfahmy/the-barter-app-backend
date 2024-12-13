@@ -12,7 +12,7 @@ class BarterTransactionPolicy
      */
     public function update(User $user, BarterTransaction $barter_transaction): bool
     {
-        return $user->id === $barter_transaction->barter_acquirer_id || $user->id === $barter_transaction->barter_provider_id;
+        return $user->id == $barter_transaction->barter_acquirer_id || $user->id == $barter_transaction->barter_provider_id;
     }
 
     /**
@@ -20,6 +20,6 @@ class BarterTransactionPolicy
      */
     public function delete(User $user, BarterTransaction $barter_transaction): bool
     {
-        return $user->id === $barter_transaction->barter_acquirer_id;
+        return $user->id == $barter_transaction->barter_acquirer_id;
     }
 }

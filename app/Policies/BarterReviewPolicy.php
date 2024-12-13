@@ -12,7 +12,7 @@ class BarterReviewPolicy
      */
     public function update(User $user, BarterReview $barter_review): bool
     {
-        return $user->id === $barter_review->author_id;
+        return $user->id == $barter_review->author_id;
     }
 
     /**
@@ -20,6 +20,6 @@ class BarterReviewPolicy
      */
     public function delete(User $user, BarterReview $barter_review): bool
     {
-        return $user->id === $barter_review->author_id;
+        return $user->id == $barter_review->author_id;
     }
 }

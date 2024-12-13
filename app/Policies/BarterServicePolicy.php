@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\BarterService;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class BarterServicePolicy
 {
@@ -12,7 +13,7 @@ class BarterServicePolicy
      */
     public function update(User $user, BarterService $barter_service): bool
     {
-        return $user->id === $barter_service->barter_provider_id;
+        return $user->id == $barter_service->barter_provider_id;
     }
 
     /**
@@ -20,6 +21,6 @@ class BarterServicePolicy
      */
     public function delete(User $user, BarterService $barter_service): bool
     {
-        return $user->id === $barter_service->barter_provider_id;
+        return $user->id == $barter_service->barter_provider_id;
     }
 }
