@@ -27,11 +27,8 @@ class BarterInvoiceController extends BaseController
 
     public function show($barter_invoice_id): JsonResponse
     {
-        $barter_invoice = BarterInvoice::with('barter_transaction.barter_service', 'barter_transaction.barter_acquirer', 'barter_transaction.barter_provider', 'barter_services')->find($barter_invoice_id);
-
-        if (! isset($barter_invoice)) {
-            throw (new \Exception('Invoice does not exist'));
-        }
+        $barter_invoice = BarterInvoice::with('barter_transaction.barter_service', 'barter_transaction.barter_acquirer', 'barter_transaction.barter_provider', 'barter_services')
+            ->findOrFail($barter_invoice_id);
 
         return ApiResponse::success(
             'Invoice detail fetched successfully',
@@ -77,10 +74,7 @@ class BarterInvoiceController extends BaseController
         try {
             DB::beginTransaction();
 
-            $barter_invoice = BarterInvoice::find($barter_invoice_id);
-            if (! isset($barter_invoice)) {
-                throw (new \Exception('Invoice does not exist'));
-            }
+            $barter_invoice = BarterInvoice::findOrFail($barter_invoice_id);
 
             Gate::authorize('update', $barter_invoice);
 
@@ -115,10 +109,7 @@ class BarterInvoiceController extends BaseController
         try {
             DB::beginTransaction();
 
-            $barter_invoice = BarterInvoice::find($barter_invoice_id);
-            if (! isset($barter_invoice)) {
-                throw (new \Exception('Invoice does not exist'));
-            }
+            $barter_invoice = BarterInvoice::findOrFail($barter_invoice_id);
 
             Gate::authorize('delete', $barter_invoice);
 

@@ -54,11 +54,8 @@ class BarterServiceController extends BaseController
 
     public function show($barter_service_id): JsonResponse
     {
-        $barter_service = BarterService::with('barter_provider', 'barter_category')->find($barter_service_id);
-
-        if (! isset($barter_service)) {
-            throw (new \Exception('Service does not exist'));
-        }
+        $barter_service = BarterService::with('barter_provider', 'barter_category')
+            ->findOrFail($barter_service_id);
 
         return ApiResponse::success(
             'Service detail fetched successfully',
@@ -100,10 +97,7 @@ class BarterServiceController extends BaseController
         try {
             DB::beginTransaction();
 
-            $barter_service = BarterService::find($barter_service_id);
-            if (! isset($barter_service)) {
-                throw (new \Exception('Service does not exist'));
-            }
+            $barter_service = BarterService::findOrFail($barter_service_id);
 
             Gate::authorize('update', $barter_service);
 
@@ -134,10 +128,7 @@ class BarterServiceController extends BaseController
         try {
             DB::beginTransaction();
 
-            $barter_service = BarterService::find($barter_service_id);
-            if (! isset($barter_service)) {
-                throw (new \Exception('Service does not exist'));
-            }
+            $barter_service = BarterService::findOrFail($barter_service_id);
 
             Gate::authorize('delete', $barter_service);
 

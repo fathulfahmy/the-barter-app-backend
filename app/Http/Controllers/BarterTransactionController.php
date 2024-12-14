@@ -73,11 +73,8 @@ class BarterTransactionController extends BaseController
 
     public function show($barter_transaction_id): JsonResponse
     {
-        $barter_transaction = BarterTransaction::with('barter_acquirer', 'barter_service', 'barter_invoice')->find($barter_transaction_id);
-
-        if (! isset($barter_transaction)) {
-            throw (new \Exception('Transaction does not exist'));
-        }
+        $barter_transaction = BarterTransaction::with('barter_acquirer', 'barter_service', 'barter_invoice')
+            ->findOrFail($barter_transaction_id);
 
         return ApiResponse::success(
             'Transaction detail fetched successfully',
@@ -94,11 +91,7 @@ class BarterTransactionController extends BaseController
             $validated = $request->validated();
             $barter_acquirer_id = auth()->id();
 
-            $barter_service = BarterService::find($validated['barter_service_id']);
-
-            if (! isset($barter_service)) {
-                throw (new \Exception('Service does not exist'));
-            }
+            $barter_service = BarterService::findOrFail($validated['barter_service_id']);
 
             $barter_transaction = BarterTransaction::create([
                 'barter_acquirer_id' => $barter_acquirer_id,
@@ -140,10 +133,7 @@ class BarterTransactionController extends BaseController
         try {
             DB::beginTransaction();
 
-            $barter_transaction = BarterTransaction::find($barter_transaction_id);
-            if (! isset($barter_transaction)) {
-                throw (new \Exception('Transaction does not exist'));
-            }
+            $barter_transaction = BarterTransaction::findOrFail($barter_transaction_id);
 
             Gate::authorize('update', $barter_transaction);
 
@@ -174,10 +164,7 @@ class BarterTransactionController extends BaseController
         try {
             DB::beginTransaction();
 
-            $barter_transaction = BarterTransaction::find($barter_transaction_id);
-            if (! isset($barter_transaction)) {
-                throw (new \Exception('Transaction does not exist'));
-            }
+            $barter_transaction = BarterTransaction::findOrFail($barter_transaction_id);
 
             Gate::authorize('delete', $barter_transaction);
 

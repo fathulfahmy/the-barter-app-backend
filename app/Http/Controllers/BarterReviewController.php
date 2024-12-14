@@ -46,11 +46,8 @@ class BarterReviewController extends BaseController
 
     public function show($barter_review_id): JsonResponse
     {
-        $barter_review = BarterReview::with('author', 'barter_service', 'barter_transaction.barter_invoice')->find($barter_review_id);
-
-        if (! isset($barter_review)) {
-            throw (new \Exception('Review does not exist'));
-        }
+        $barter_review = BarterReview::with('author', 'barter_service', 'barter_transaction.barter_invoice')
+            ->findOrFail($barter_review_id);
 
         return ApiResponse::success(
             'Review detail fetched successfully',
@@ -67,11 +64,7 @@ class BarterReviewController extends BaseController
             $validated = $request->validated();
             $validated['author_id'] = auth()->id();
 
-            $barter_transaction = BarterTransaction::find($validated['barter_transaction_id']);
-
-            if (! isset($barter_transaction)) {
-                throw (new \Exception('Transaction does not exist'));
-            }
+            $barter_transaction = BarterTransaction::findOrFail($validated['barter_transaction_id']);
 
             $validated['barter_service_id'] = $barter_transaction->barter_service_id;
 
@@ -101,10 +94,7 @@ class BarterReviewController extends BaseController
         try {
             DB::beginTransaction();
 
-            $barter_review = BarterReview::find($barter_review_id);
-            if (! isset($barter_review)) {
-                throw (new \Exception('Review does not exist'));
-            }
+            $barter_review = BarterReview::findOrFail($barter_review_id);
 
             Gate::authorize('update', $barter_review);
 
@@ -135,10 +125,7 @@ class BarterReviewController extends BaseController
         try {
             DB::beginTransaction();
 
-            $barter_review = BarterReview::find($barter_review_id);
-            if (! isset($barter_review)) {
-                throw (new \Exception('Review does not exist'));
-            }
+            $barter_review = BarterReview::findOrFail($barter_review_id);
 
             Gate::authorize('delete', $barter_review);
 
