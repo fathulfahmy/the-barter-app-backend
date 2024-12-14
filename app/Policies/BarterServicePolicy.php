@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\BarterService;
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
 
 class BarterServicePolicy
 {

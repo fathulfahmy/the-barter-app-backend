@@ -3,7 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Models\User;
-use Illuminate\Validation\Rules;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class UserUpdateRequest extends BaseRequest
 {
@@ -24,9 +25,9 @@ class UserUpdateRequest extends BaseRequest
     {
         return [
             'name' => 'sometimes|required|string|max:255',
-            'avatar' => 'sometimes|required|image',
-            'email' => ['sometimes', 'required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'password' => ['sometimes', 'required', 'confirmed', Rules\Password::defaults()],
+            'avatar' => 'sometimes|nullable|string',
+            'email' => ['sometimes', 'required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore(auth()->id())],
+            'password' => ['sometimes', 'required', 'confirmed', Password::defaults()],
         ];
     }
 }

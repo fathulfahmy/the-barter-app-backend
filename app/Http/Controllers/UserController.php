@@ -16,10 +16,7 @@ class UserController extends BaseController
         try {
             DB::beginTransaction();
 
-            $user = User::find($user_id);
-            if (!isset($user)) {
-                throw (new \Exception('User does not exist'));
-            }
+            $user = User::findOrFail($user_id);
 
             Gate::authorize('update', $user);
 
@@ -27,9 +24,16 @@ class UserController extends BaseController
 
             $user->update(Arr::except($validated, ['image']));
 
-            if ($request->hasFile('avatar')) {
+            if (! empty($validated['avatar'])) {
                 $user->clearMediaCollection('avatar');
-                $user->addMediaFromRequest('avatar')->toMediaCollection('avatar');
+
+                $file = $this->getBase64File($validated['avatar']);
+                $filename = $user->id.$this->getBase64FileName($validated['avatar']);
+
+                $user
+                    ->addMediaFromBase64($file)
+                    ->usingFileName($filename)
+                    ->toMediaCollection('avatar');
             }
 
             DB::commit();

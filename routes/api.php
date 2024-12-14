@@ -6,6 +6,7 @@ use App\Http\Controllers\BarterInvoiceController;
 use App\Http\Controllers\BarterReviewController;
 use App\Http\Controllers\BarterServiceController;
 use App\Http\Controllers\BarterTransactionController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // AUTH
@@ -47,4 +48,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // BARTER CATEGORIES
     Route::get('/barter_categories', [BarterCategoryController::class, 'index'])->name('api.barter_categories.index');
+
+    Route::patch('/profile/{user_id}', [UserController::class, 'update'])->name('api.profile.update');
 });
