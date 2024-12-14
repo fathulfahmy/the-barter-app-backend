@@ -79,6 +79,10 @@ class User extends Authenticatable
     {
         $this
             ->addMediaCollection('avatar')->singleFile()
+            ->useFallbackUrl(config('app.default.image'))
+            ->useFallbackUrl(config('app.default.image'))
+            ->useFallbackPath(public_path(config('app.default.image')))
+            ->useFallbackPath(public_path(config('app.default.image')), 'thumb')
             ->registerMediaConversions(function (Media $media) {
                 $this
                     ->addMediaConversion('thumb')
