@@ -132,7 +132,11 @@ return [
     */
     'default' => [
         'pagination' => 10,
-        'image' => env('APP_URL') . '/storage/images/placeholder_image_500_500.png',
+        'image' => [
+            'uri' => env('APP_URL').'/storage/images/placeholder_image_500_500.png',
+            'name' => 'placeholder_image_500_500.png',
+            'type' => 'image/png',
+        ],
     ],
 
 ];

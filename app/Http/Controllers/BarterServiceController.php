@@ -8,6 +8,7 @@ use App\Http\Requests\BarterServiceUpdateRequest;
 use App\Models\BarterService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
@@ -102,9 +103,23 @@ class BarterServiceController extends BaseController
             Gate::authorize('update', $barter_service);
 
             $validated = $request->validated();
-            $barter_service->update($validated);
+
+            $barter_service->update(Arr::except($validated, ['images']));
+
+            $barter_service->clearMediaCollection('barter_service_images');
+
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $file) {
+                    $barter_service
+                        ->addMedia($file)
+                        ->usingFileName($file->getClientOriginalName())
+                        ->toMediaCollection('barter_service_images');
+                }
+            }
 
             DB::commit();
+
+            $barter_service->refresh();
 
             return ApiResponse::success(
                 'Service updated successfully',

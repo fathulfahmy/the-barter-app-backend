@@ -78,11 +78,9 @@ class User extends Authenticatable
     public function registerMediaCollections(): void
     {
         $this
-            ->addMediaCollection('avatar')->singleFile()
-            ->useFallbackUrl(config('app.default.image'))
-            ->useFallbackUrl(config('app.default.image'))
-            ->useFallbackPath(public_path(config('app.default.image')))
-            ->useFallbackPath(public_path(config('app.default.image')), 'thumb')
+            ->addMediaCollection('user_avatar')->singleFile()
+            ->useFallbackUrl(config('app.default.image.uri'))
+            ->useFallbackPath(public_path(config('app.default.image.uri')))
             ->registerMediaConversions(function (Media $media) {
                 $this
                     ->addMediaConversion('thumb')
@@ -93,6 +91,20 @@ class User extends Authenticatable
 
     protected function getAvatarAttribute()
     {
-        return $this->getFirstMediaUrl('avatar', 'thumb');
+        $media = $this->getFirstMedia('user_avatar');
+
+        if ($media) {
+            return [
+                'uri' => $media->getFullUrl(),
+                'name' => $media->file_name,
+                'type' => $media->mime_type,
+            ];
+        }
+
+        return [
+            'uri' => config('app.default.image.uri'),
+            'name' => config('app.default.image.name'),
+            'type' => config('app.default.image.type'),
+        ];
     }
 }

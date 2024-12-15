@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class BarterService extends BaseModel
 {
@@ -28,7 +29,7 @@ class BarterService extends BaseModel
         'status',
     ];
 
-    protected $appends = ['pending_count', 'completed_count'];
+    protected $appends = ['pending_count', 'completed_count', 'images'];
 
     public function barter_provider(): BelongsTo
     {
@@ -73,5 +74,30 @@ class BarterService extends BaseModel
         $result = $completed_transactions + $completed_invoices;
 
         return $result;
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('barter_service_images')
+            ->useFallbackUrl(config('app.default.image.uri'))
+            ->useFallbackPath(public_path(config('app.default.image.uri')))
+            ->registerMediaConversions(function (Media $media) {
+                $this
+                    ->addMediaConversion('thumb')
+                    ->width(300)
+                    ->height(300);
+            });
+    }
+
+    protected function getImagesAttribute()
+    {
+        return $this->getMedia('barter_service_images')->map(function ($media) {
+            return [
+                'uri' => $media->getFullUrl(),
+                'name' => $media->file_name,
+                'type' => $media->mime_type,
+            ];
+        })->toArray();
     }
 }

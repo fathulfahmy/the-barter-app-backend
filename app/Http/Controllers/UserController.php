@@ -24,19 +24,19 @@ class UserController extends BaseController
 
             $user->update(Arr::except($validated, ['image']));
 
-            if (! empty($validated['avatar'])) {
-                $user->clearMediaCollection('avatar');
+            $user->clearMediaCollection('user_avatar');
 
-                $file = $this->getBase64File($validated['avatar']);
-                $filename = $user->id.$this->getBase64FileName($validated['avatar']);
-
+            if ($request->hasFile('avatar')) {
+                $file = $request->file('avatar');
                 $user
-                    ->addMediaFromBase64($file)
-                    ->usingFileName($filename)
-                    ->toMediaCollection('avatar');
+                    ->addMedia($file)
+                    ->usingFileName($file->getClientOriginalName())
+                    ->toMediaCollection('user_avatar');
             }
 
             DB::commit();
+
+            $user->refresh();
 
             return ApiResponse::success(
                 'User updated successfully',

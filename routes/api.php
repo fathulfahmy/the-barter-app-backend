@@ -49,5 +49,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // BARTER CATEGORIES
     Route::get('/barter_categories', [BarterCategoryController::class, 'index'])->name('api.barter_categories.index');
 
+    // USER
     Route::patch('/profile/{user_id}', [UserController::class, 'update'])->name('api.profile.update');
 });
