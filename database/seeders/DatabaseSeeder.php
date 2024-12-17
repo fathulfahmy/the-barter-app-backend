@@ -10,6 +10,7 @@ use App\Models\BarterTransaction;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,6 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->seedBarterCategories(10);
         $this->seedBarterServices(5);
         $this->seedBarterTransactions(count: 1000);
+        $this->clearMedia();
 
         $this->command->info('Seeding complete!');
     }
@@ -96,6 +98,16 @@ class DatabaseSeeder extends Seeder
                     }
                 }
             }
+        }
+    }
+
+    protected function clearMedia()
+    {
+        $this->command->info('Clearing media...');
+
+        if (Storage::disk('public')->exists('media')) {
+            Storage::disk('public')->deleteDirectory('media');
+            Storage::disk('public')->makeDirectory('media');
         }
     }
 }

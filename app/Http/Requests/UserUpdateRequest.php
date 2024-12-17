@@ -25,7 +25,7 @@ class UserUpdateRequest extends BaseRequest
     {
         return [
             'name' => 'sometimes|required|string|max:255',
-            'avatar' => 'sometimes|nullable|file|mimes:jpg,jpeg,png|max:5120',
+            'avatar' => 'sometimes|nullable',
             'email' => ['sometimes', 'required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore(auth()->id())],
             'password' => ['sometimes', 'required', 'confirmed', Password::defaults()],
         ];

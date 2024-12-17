@@ -72,8 +72,15 @@ class BarterServiceController extends BaseController
 
             $validated = $request->validated();
             $validated['barter_provider_id'] = auth()->id();
-            $barter_service = BarterService::create($validated);
+            $barter_service = BarterService::create(Arr::except($validated, ['images']));
 
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $file) {
+                    $barter_service
+                        ->addMedia($file)
+                        ->toMediaCollection('barter_service_images');
+                }
+            }
             DB::commit();
 
             return ApiResponse::success(
@@ -112,7 +119,6 @@ class BarterServiceController extends BaseController
                 foreach ($request->file('images') as $file) {
                     $barter_service
                         ->addMedia($file)
-                        ->usingFileName($file->getClientOriginalName())
                         ->toMediaCollection('barter_service_images');
                 }
             }

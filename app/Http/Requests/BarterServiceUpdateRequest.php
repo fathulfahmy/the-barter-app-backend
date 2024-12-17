@@ -27,8 +27,8 @@ class BarterServiceUpdateRequest extends BaseRequest
             'max_price' => 'required_with:min_price|numeric|min:0|max:99999999.99|gte:min_price',
             'price_unit' => 'sometimes|string|max:255',
             'status' => 'sometimes|required|string',
-            'images' => 'sometimes|nullable|max:5',
-            'images.*' => 'sometimes|nullable|file|mimes:jpg,jpeg,png|max:5120',
+            'images' => 'sometimes|nullable',
+            'images.*' => 'sometimes|nullable',
         ];
     }
 }

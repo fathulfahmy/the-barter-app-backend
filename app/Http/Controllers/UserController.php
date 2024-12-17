@@ -30,7 +30,6 @@ class UserController extends BaseController
                 $file = $request->file('avatar');
                 $user
                     ->addMedia($file)
-                    ->usingFileName($file->getClientOriginalName())
                     ->toMediaCollection('user_avatar');
             }
 
