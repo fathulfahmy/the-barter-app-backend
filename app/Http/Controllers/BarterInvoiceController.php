@@ -2,41 +2,64 @@
 
 namespace App\Http\Controllers;
 
-use App\ApiResponse;
 use App\Http\Requests\BarterInvoiceStoreRequest;
 use App\Http\Requests\BarterInvoiceUpdateRequest;
 use App\Models\BarterInvoice;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Symfony\Component\HttpFoundation\Response;
 
 class BarterInvoiceController extends BaseController
 {
+    /**
+     * Display a listing of the barter invoice.
+     */
     public function index(): JsonResponse
     {
-        $barter_invoices = BarterInvoice::with('barter_transaction.barter_service', 'barter_transaction.barter_acquirer', 'barter_services')
-            ->where('barter_acquirer_id', auth()->id())
-            ->paginate(config('app.default.pagination'));
+        try {
+            $barter_invoices = BarterInvoice::with('barter_transaction.barter_service', 'barter_transaction.barter_acquirer', 'barter_services')
+                ->where('barter_acquirer_id', auth()->id())
+                ->paginate(config('app.default.pagination'));
 
-        return ApiResponse::success(
-            'Invoices fetched successfully',
-            200,
-            $barter_invoices,
-        );
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoices fetched successfully',
+                'data' => $barter_invoices,
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch invoices');
+        }
     }
 
-    public function show($barter_invoice_id): JsonResponse
+    /**
+     * Display the specified barter invoice.
+     */
+    public function show(string $barter_invoice_id): JsonResponse
     {
-        $barter_invoice = BarterInvoice::with('barter_transaction.barter_service', 'barter_transaction.barter_acquirer', 'barter_transaction.barter_provider', 'barter_services')
-            ->findOrFail($barter_invoice_id);
+        try {
+            $barter_invoice = BarterInvoice::with('barter_transaction.barter_service', 'barter_transaction.barter_acquirer', 'barter_transaction.barter_provider', 'barter_services')
+                ->findOrFail($barter_invoice_id);
 
-        return ApiResponse::success(
-            'Invoice detail fetched successfully',
-            200,
-            $barter_invoice,
-        );
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice detail fetched successfully',
+                'data' => $barter_invoice,
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch invoice detail');
+        }
     }
 
+    /**
+     * Store a newly created barter invoice in storage.
+     */
     public function store(BarterInvoiceStoreRequest $request): JsonResponse
     {
         try {
@@ -52,24 +75,23 @@ class BarterInvoiceController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success(
-                'Invoice created successfully',
-                201,
-                $barter_invoice
-            );
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice created successfully',
+                'data' => $barter_invoice,
+            ], Response::HTTP_CREATED);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return ApiResponse::error(
-                'Failed to create invoice',
-                500,
-                [$e->getMessage()],
-            );
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to create invoice');
         }
     }
 
-    public function update(BarterInvoiceUpdateRequest $request, $barter_invoice_id): JsonResponse
+    /**
+     * Update the specified barter invoice in storage.
+     */
+    public function update(BarterInvoiceUpdateRequest $request, string $barter_invoice_id): JsonResponse
     {
         try {
             DB::beginTransaction();
@@ -87,24 +109,23 @@ class BarterInvoiceController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success(
-                'Invoice updated successfully',
-                200,
-                $barter_invoice
-            );
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice updated successfully',
+                'data' => $barter_invoice,
+            ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return ApiResponse::error(
-                'Failed to update invoice',
-                500,
-                [$e->getMessage()],
-            );
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to update invoice');
         }
     }
 
-    public function destroy($barter_invoice_id): JsonResponse
+    /**
+     * Remove the specified barter invoice from storage.
+     */
+    public function destroy(string $barter_invoice_id): JsonResponse
     {
         try {
             DB::beginTransaction();
@@ -117,16 +138,16 @@ class BarterInvoiceController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success('Invoice deleted successfully', 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice deleted successfully',
+                'data' => [],
+            ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return ApiResponse::error(
-                'Failed to delete invoice',
-                500,
-                [$e->getMessage()],
-            );
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to delete invoice');
         }
     }
 }

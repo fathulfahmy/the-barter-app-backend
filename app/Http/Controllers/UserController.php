@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\ApiResponse;
 use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends BaseController
 {
-    public function update(UserUpdateRequest $request, $user_id)
+    /**
+     * Update the specified user in storage.
+     */
+    public function update(UserUpdateRequest $request, string $user_id)
     {
         try {
             DB::beginTransaction();
@@ -37,20 +40,16 @@ class UserController extends BaseController
 
             $user->refresh();
 
-            return ApiResponse::success(
-                'User updated successfully',
-                200,
-                $user
-            );
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated successfully',
+                'data' => $user,
+            ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return ApiResponse::error(
-                'Failed to update user',
-                500,
-                [$e->getMessage()],
-            );
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to update user');
         }
     }
 }

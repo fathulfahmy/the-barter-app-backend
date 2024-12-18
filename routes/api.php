@@ -6,6 +6,7 @@ use App\Http\Controllers\BarterInvoiceController;
 use App\Http\Controllers\BarterReviewController;
 use App\Http\Controllers\BarterServiceController;
 use App\Http\Controllers\BarterTransactionController;
+use App\Http\Controllers\StripeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -51,4 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // USER
     Route::patch('/profile/{user_id}', [UserController::class, 'update'])->name('api.profile.update');
+
+    // STRIPE
+    Route::post('/stripe/payment_sheet', [StripeController::class, 'payment_sheet'])->name('api.stripe.payment_sheet');
 });

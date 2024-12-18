@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\ApiResponse;
 use App\Http\Requests\AuthLoginRequest;
 use App\Http\Requests\AuthRegisterRequest;
 use App\Models\User;
@@ -10,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends BaseController
 {
@@ -29,20 +29,20 @@ class AuthController extends BaseController
             $request->authenticate();
             $token = $user->createToken('auth-token')->plainTextToken;
 
-            return ApiResponse::success('Registered successfully', 201, [
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'user' => auth()->user()->load('barter_services'),
-            ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Registered successfully',
+                'data' => [
+                    'token' => $token,
+                    'token_type' => 'Bearer',
+                    'user' => auth()->user()->load('barter_services'),
+                ],
+            ], Response::HTTP_CREATED);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return ApiResponse::error(
-                'Failed to register',
-                500,
-                [$e->getMessage()]
-            );
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to register');
         }
     }
 
@@ -56,27 +56,23 @@ class AuthController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success('Logged in successfully', 200, [
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'user' => auth()->user()->load('barter_services'),
-            ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Logged in successfully',
+                'data' => [
+                    'token' => $token,
+                    'token_type' => 'Bearer',
+                    'user' => auth()->user()->load('barter_services'),
+                ],
+            ], Response::HTTP_OK);
 
         } catch (ValidationException $e) {
-            return ApiResponse::error(
-                'Invalid credentials',
-                401,
-                $e->errors()
-            );
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Invalid credentials');
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return ApiResponse::error(
-                'Failed to login',
-                500,
-                [$e->getMessage()]
-            );
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to login');
         }
     }
 
@@ -89,25 +85,30 @@ class AuthController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success('Logged out successfully', 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Logged out successfully',
+                'data' => [],
+            ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return ApiResponse::error(
-                'Failed to logout',
-                500,
-                [$e->getMessage()]
-            );
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to logout');
         }
     }
 
     public function me(): JsonResponse
     {
-        return ApiResponse::success(
-            'Fetched authenticated user successfully',
-            200,
-            auth()->user()->load('barter_services')
-        );
+        try {
+            return response()->json([
+                'success' => true,
+                'message' => 'Fetched authenticated user successfully',
+                'data' => auth()->user()->load('barter_services'),
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch authenticated user');
+        }
     }
 }

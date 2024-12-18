@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\ApiResponse;
 use App\Http\Requests\BarterReviewStoreRequest;
 use App\Http\Requests\BarterReviewUpdateRequest;
 use App\Models\BarterReview;
@@ -11,9 +10,13 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Symfony\Component\HttpFoundation\Response;
 
 class BarterReviewController extends BaseController
 {
+    /**
+     * Display a listing of the barter review.
+     */
     public function index(Request $request): JsonResponse
     {
         try {
@@ -30,32 +33,40 @@ class BarterReviewController extends BaseController
 
             $barter_reviews = $query->paginate(config('app.default.pagination'));
 
-            return ApiResponse::success(
-                'Reviews fetched successfully',
-                200,
-                $barter_reviews
-            );
+            return response()->json([
+                'success' => true,
+                'message' => 'Reviews fetched successfully',
+                'data' => $barter_reviews,
+            ], Response::HTTP_OK);
+
         } catch (\Exception $e) {
-            return ApiResponse::error(
-                'Failed to fetch reviews',
-                500,
-                [$e->getMessage()]
-            );
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch reviews');
         }
     }
 
-    public function show($barter_review_id): JsonResponse
+    /**
+     * Display the specified barter review.
+     */
+    public function show(string $barter_review_id): JsonResponse
     {
-        $barter_review = BarterReview::with('author', 'barter_service', 'barter_transaction.barter_invoice')
-            ->findOrFail($barter_review_id);
+        try {
+            $barter_review = BarterReview::with('author', 'barter_service', 'barter_transaction.barter_invoice')
+                ->findOrFail($barter_review_id);
 
-        return ApiResponse::success(
-            'Review detail fetched successfully',
-            200,
-            $barter_review,
-        );
+            return response()->json([
+                'success' => true,
+                'message' => 'Review detail fetched successfully',
+                'data' => $barter_review,
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch review detail');
+        }
     }
 
+    /**
+     * Store a newly created barter review in storage.
+     */
     public function store(BarterReviewStoreRequest $request): JsonResponse
     {
         try {
@@ -72,24 +83,23 @@ class BarterReviewController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success(
-                'Review created successfully',
-                201,
-                $barter_review
-            );
+            return response()->json([
+                'success' => true,
+                'message' => 'Review created successfully',
+                'data' => $barter_review,
+            ], Response::HTTP_CREATED);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return ApiResponse::error(
-                'Failed to create review',
-                500,
-                [$e->getMessage()],
-            );
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to create review');
         }
     }
 
-    public function update(BarterReviewUpdateRequest $request, $barter_review_id): JsonResponse
+    /**
+     * Update the specified barter review in storage.
+     */
+    public function update(BarterReviewUpdateRequest $request, string $barter_review_id): JsonResponse
     {
         try {
             DB::beginTransaction();
@@ -103,24 +113,23 @@ class BarterReviewController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success(
-                'Review updated successfully',
-                200,
-                $barter_review
-            );
+            return response()->json([
+                'success' => true,
+                'message' => 'Review updated successfully',
+                'data' => $barter_review,
+            ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return ApiResponse::error(
-                'Failed to update review',
-                500,
-                [$e->getMessage()],
-            );
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to update review');
         }
     }
 
-    public function destroy($barter_review_id): JsonResponse
+    /**
+     * Remove the specified barter review from storage.
+     */
+    public function destroy(string $barter_review_id): JsonResponse
     {
         try {
             DB::beginTransaction();
@@ -133,16 +142,16 @@ class BarterReviewController extends BaseController
 
             DB::commit();
 
-            return ApiResponse::success('Review deleted successfully', 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Review deleted successfully',
+                'data' => [],
+            ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return ApiResponse::error(
-                'Failed to delete review',
-                500,
-                [$e->getMessage()],
-            );
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to delete review');
         }
     }
 }
