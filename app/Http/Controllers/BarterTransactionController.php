@@ -13,10 +13,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @tags Transaction
+ */
 class BarterTransactionController extends BaseController
 {
     /**
-     * Display a listing of the barter transaction.
+     * Get Transactions
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: Illuminate\Pagination\LengthAwarePaginator<BarterTransaction>,
+     * }
      */
     public function index(Request $request): JsonResponse
     {
@@ -60,11 +69,7 @@ class BarterTransactionController extends BaseController
                 ->orderBy('updated_at', 'desc')
                 ->paginate(config('app.default.pagination'));
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Transactions fetched successfully',
-                'data' => $barter_transactions,
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('Transactions fetched successfully', $barter_transactions);
 
         } catch (\Exception $e) {
             abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch transactions');
@@ -72,7 +77,13 @@ class BarterTransactionController extends BaseController
     }
 
     /**
-     * Display the specified barter transaction.
+     * Get Transaction
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: BarterTransaction
+     * }
      */
     public function show(string $barter_transaction_id): JsonResponse
     {
@@ -80,11 +91,7 @@ class BarterTransactionController extends BaseController
             $barter_transaction = BarterTransaction::with('barter_acquirer', 'barter_provider', 'barter_service', 'barter_invoice')
                 ->findOrFail($barter_transaction_id);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Transaction detail fetched successfully',
-                'data' => $barter_transaction,
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('Transaction detail fetched successfully', $barter_transaction);
 
         } catch (\Exception $e) {
             abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch transaction detail');
@@ -92,7 +99,13 @@ class BarterTransactionController extends BaseController
     }
 
     /**
-     * Store a newly created barter transaction in storage.
+     * Create Transaction
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: BarterTransaction
+     * }
      */
     public function store(BarterTransactionStoreRequest $request): JsonResponse
     {
@@ -122,11 +135,7 @@ class BarterTransactionController extends BaseController
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Transaction created successfully',
-                'data' => $barter_transaction,
-            ], Response::HTTP_CREATED);
+            return response()->apiSuccess('Transaction created successfully', $barter_transaction);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -136,7 +145,13 @@ class BarterTransactionController extends BaseController
     }
 
     /**
-     * Update the specified barter transaction in storage.
+     * Update Transaction
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: BarterTransaction
+     * }
      */
     public function update(BarterTransactionUpdateRequest $request, string $barter_transaction_id): JsonResponse
     {
@@ -152,11 +167,7 @@ class BarterTransactionController extends BaseController
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Transaction updated successfully',
-                'data' => $barter_transaction,
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('Transaction updated successfully', $barter_transaction);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -166,7 +177,13 @@ class BarterTransactionController extends BaseController
     }
 
     /**
-     * Remove the specified barter transaction from storage.
+     * Delete Transaction
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: [],
+     * }
      */
     public function destroy(string $barter_transaction_id): JsonResponse
     {
@@ -181,11 +198,7 @@ class BarterTransactionController extends BaseController
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Transaction deleted successfully',
-                'data' => [],
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('Transaction deleted successfully');
 
         } catch (\Exception $e) {
             DB::rollBack();

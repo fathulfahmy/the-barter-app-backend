@@ -11,8 +11,24 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @tags Auth
+ */
 class AuthController extends BaseController
 {
+    /**
+     * Register
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: array{
+     *          token: string,
+     *          token_type: 'Bearer',
+     *          user: User,
+     *      }
+     * }
+     */
     public function register(AuthRegisterRequest $request): JsonResponse
     {
         try {
@@ -29,15 +45,13 @@ class AuthController extends BaseController
             $request->authenticate();
             $token = $user->createToken('auth-token')->plainTextToken;
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Registered successfully',
-                'data' => [
-                    'token' => $token,
-                    'token_type' => 'Bearer',
-                    'user' => auth()->user()->load('barter_services'),
-                ],
-            ], Response::HTTP_CREATED);
+            $response = [
+                'token' => $token,
+                'token_type' => 'Bearer',
+                'user' => auth()->user()->load('barter_services'),
+            ];
+
+            return response()->apiSuccess('Registered successfully', $response, Response::HTTP_CREATED);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -46,6 +60,19 @@ class AuthController extends BaseController
         }
     }
 
+    /**
+     * Login
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: array{
+     *          token: string,
+     *          token_type: 'Bearer',
+     *          user: User,
+     *      }
+     * }
+     */
     public function login(AuthLoginRequest $request): JsonResponse
     {
         try {
@@ -56,15 +83,13 @@ class AuthController extends BaseController
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Logged in successfully',
-                'data' => [
-                    'token' => $token,
-                    'token_type' => 'Bearer',
-                    'user' => auth()->user()->load('barter_services'),
-                ],
-            ], Response::HTTP_OK);
+            $response = [
+                'token' => $token,
+                'token_type' => 'Bearer',
+                'user' => auth()->user()->load('barter_services'),
+            ];
+
+            return response()->apiSuccess('Logged in successfully', $response);
 
         } catch (ValidationException $e) {
             abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Invalid credentials');
@@ -76,6 +101,15 @@ class AuthController extends BaseController
         }
     }
 
+    /**
+     * Logout
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: [],
+     * }
+     */
     public function logout(): JsonResponse
     {
         try {
@@ -85,11 +119,7 @@ class AuthController extends BaseController
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Logged out successfully',
-                'data' => [],
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('Logged out successfully');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -98,14 +128,26 @@ class AuthController extends BaseController
         }
     }
 
+    /**
+     * Get Auth User
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: User,
+     * }
+     */
     public function me(): JsonResponse
     {
         try {
-            return response()->json([
-                'success' => true,
-                'message' => 'Fetched authenticated user successfully',
-                'data' => auth()->user()->load('barter_services'),
-            ], Response::HTTP_OK);
+            $response = response()->apiSuccess(
+                'Fetched authenticated user successfully',
+                auth()->user()->load('barter_services'),
+            );
+
+            \Illuminate\Support\Facades\Log::debug($response);
+
+            return $response;
 
         } catch (\Exception $e) {
             abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch authenticated user');

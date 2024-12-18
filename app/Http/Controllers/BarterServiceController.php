@@ -12,10 +12,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @tags Service
+ */
 class BarterServiceController extends BaseController
 {
     /**
-     * Display a listing of barter services.
+     * Get Services
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: Illuminate\Pagination\LengthAwarePaginator<BarterService>,
+     * }
      */
     public function index(Request $request): JsonResponse
     {
@@ -41,11 +50,7 @@ class BarterServiceController extends BaseController
 
             $barter_services = $query->paginate(config('app.default.pagination'));
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Services fetched successfully',
-                'data' => $barter_services,
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('Services fetched successfully', $barter_services);
 
         } catch (\Exception $e) {
             abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch services');
@@ -53,7 +58,13 @@ class BarterServiceController extends BaseController
     }
 
     /**
-     * Display the specified barter service.
+     * Get Service
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: BarterService,
+     * }
      */
     public function show(string $barter_service_id): JsonResponse
     {
@@ -61,11 +72,7 @@ class BarterServiceController extends BaseController
             $barter_service = BarterService::with('barter_provider', 'barter_category')
                 ->findOrFail($barter_service_id);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Service detail fetched successfully',
-                'data' => $barter_service,
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('Service detail fetched successfully', $barter_service);
 
         } catch (\Exception $e) {
             abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch services');
@@ -73,7 +80,13 @@ class BarterServiceController extends BaseController
     }
 
     /**
-     * Store a newly created barter service in storage.
+     * Create Service
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: BarterService,
+     * }
      */
     public function store(BarterServiceStoreRequest $request): JsonResponse
     {
@@ -93,11 +106,7 @@ class BarterServiceController extends BaseController
             }
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Service created successfully',
-                'data' => $barter_service,
-            ], Response::HTTP_CREATED);
+            return response()->apiSuccess('Service created successfully', $barter_service);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -107,7 +116,13 @@ class BarterServiceController extends BaseController
     }
 
     /**
-     * Update the specified barter service in storage.
+     * Update Service
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: BarterService,
+     * }
      */
     public function update(BarterServiceUpdateRequest $request, string $barter_service_id): JsonResponse
     {
@@ -136,11 +151,7 @@ class BarterServiceController extends BaseController
 
             $barter_service->refresh();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Service updated successfully',
-                'data' => $barter_service,
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('Service updated successfully', $barter_service);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -150,7 +161,13 @@ class BarterServiceController extends BaseController
     }
 
     /**
-     * Remove the specified barter service from storage.
+     * Delete Service
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: [],
+     * }
      */
     public function destroy(string $barter_service_id): JsonResponse
     {
@@ -165,11 +182,7 @@ class BarterServiceController extends BaseController
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Service deleted successfully',
-                'data' => [],
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('Service deleted successfully');
 
         } catch (\Exception $e) {
             DB::rollBack();

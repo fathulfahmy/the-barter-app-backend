@@ -20,7 +20,7 @@ class StripePaymentSheetRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'amount' => 'numeric|min:1|max:99999999.99',
+            'amount' => 'numeric|min:2|max:99999999.99',
         ];
     }
 }

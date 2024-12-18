@@ -33,79 +33,49 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (ValidationException $e, Request $request) {
             if ($request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'errors' => $e->errors(),
-                ], 422);
+                return response()->apiError($e->getMessage(), $e->errors(), 422);
             }
         });
 
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'errors' => $e->getMessage(),
-                ], 401);
+                return response()->apiError($e->getMessage(), $e->getTrace(), 401);
             }
         });
 
         $exceptions->render(function (AuthorizationException $e, Request $request) {
             if ($request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'errors' => $e->getMessage(),
-                ], 403);
+                return response()->apiError($e->getMessage(), $e->getTrace(), 403);
             }
         });
 
         $exceptions->render(function (ModelNotFoundException $e, Request $request) {
             if ($request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'errors' => $e->getMessage(),
-                ], 404);
+                return response()->apiError($e->getMessage(), $e->getTrace(), 404);
             }
         });
+
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
             if ($request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'errors' => $e->getMessage(),
-                ], 404);
+                return response()->apiError($e->getMessage(), $e->getTrace(), 404);
             }
         });
+
         $exceptions->render(function (MethodNotAllowedHttpException $e, Request $request) {
             if ($request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'errors' => $e->getMessage(),
-                ], 405);
+                return response()->apiError($e->getMessage(), $e->getTrace(), 405);
             }
         });
 
         $exceptions->render(function (HttpException $e, Request $request) {
             if ($request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'errors' => $e->getMessage(),
-                ], $e->getStatusCode());
+                return response()->apiError($e->getMessage(), $e->getTrace(), $e->getStatusCode());
             }
         });
 
         $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->is('api/*')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'errors' => $e->getMessage(),
-                ], 500);
+                return response()->apiError($e->getMessage(), $e->getTrace(), 500);
             }
         });
     })->create();

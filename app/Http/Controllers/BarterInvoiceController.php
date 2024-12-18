@@ -10,10 +10,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @tags Invoice
+ */
 class BarterInvoiceController extends BaseController
 {
     /**
-     * Display a listing of the barter invoice.
+     * Get Invoices
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: Illuminate\Pagination\LengthAwarePaginator<BarterInvoice>,
+     * }
      */
     public function index(): JsonResponse
     {
@@ -22,11 +31,7 @@ class BarterInvoiceController extends BaseController
                 ->where('barter_acquirer_id', auth()->id())
                 ->paginate(config('app.default.pagination'));
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Invoices fetched successfully',
-                'data' => $barter_invoices,
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('Invoices fetched successfully', $barter_invoices);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -36,7 +41,13 @@ class BarterInvoiceController extends BaseController
     }
 
     /**
-     * Display the specified barter invoice.
+     * Get Invoice
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: BarterInvoice,
+     * }
      */
     public function show(string $barter_invoice_id): JsonResponse
     {
@@ -44,11 +55,7 @@ class BarterInvoiceController extends BaseController
             $barter_invoice = BarterInvoice::with('barter_transaction.barter_service', 'barter_transaction.barter_acquirer', 'barter_transaction.barter_provider', 'barter_services')
                 ->findOrFail($barter_invoice_id);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Invoice detail fetched successfully',
-                'data' => $barter_invoice,
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('Invoice detail fetched successfully', $barter_invoice);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -58,7 +65,13 @@ class BarterInvoiceController extends BaseController
     }
 
     /**
-     * Store a newly created barter invoice in storage.
+     * Create Invoice
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: BarterInvoice,
+     * }
      */
     public function store(BarterInvoiceStoreRequest $request): JsonResponse
     {
@@ -75,11 +88,7 @@ class BarterInvoiceController extends BaseController
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Invoice created successfully',
-                'data' => $barter_invoice,
-            ], Response::HTTP_CREATED);
+            return response()->apiSuccess('Invoice created successfully', $barter_invoice);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -89,7 +98,13 @@ class BarterInvoiceController extends BaseController
     }
 
     /**
-     * Update the specified barter invoice in storage.
+     * Update Invoice
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: BarterInvoice,
+     * }
      */
     public function update(BarterInvoiceUpdateRequest $request, string $barter_invoice_id): JsonResponse
     {
@@ -109,11 +124,7 @@ class BarterInvoiceController extends BaseController
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Invoice updated successfully',
-                'data' => $barter_invoice,
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('Invoice updated successfully', $barter_invoice);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -123,7 +134,13 @@ class BarterInvoiceController extends BaseController
     }
 
     /**
-     * Remove the specified barter invoice from storage.
+     * Delete Invoice
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: [],
+     * }
      */
     public function destroy(string $barter_invoice_id): JsonResponse
     {
@@ -138,11 +155,7 @@ class BarterInvoiceController extends BaseController
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Invoice deleted successfully',
-                'data' => [],
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('Invoice deleted successfully');
 
         } catch (\Exception $e) {
             DB::rollBack();

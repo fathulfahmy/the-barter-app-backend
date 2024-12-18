@@ -6,6 +6,8 @@ use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,6 +33,22 @@ class AppServiceProvider extends ServiceProvider
             $openApi->secure(
                 SecurityScheme::http('bearer'),
             );
+        });
+
+        Response::macro('apiSuccess', function (string $message = '', mixed $data = [], int $status = 200): JsonResponse {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => $data,
+            ], $status);
+        });
+
+        Response::macro('apiError', function (string $message = '', mixed $errors = [], int $status = 500): JsonResponse {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'errors' => $errors,
+            ], $status);
         });
     }
 }

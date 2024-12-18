@@ -9,10 +9,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @tags User
+ */
 class UserController extends BaseController
 {
     /**
-     * Update the specified user in storage.
+     * Update User
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: User,
+     * }
      */
     public function update(UserUpdateRequest $request, string $user_id)
     {
@@ -40,11 +49,7 @@ class UserController extends BaseController
 
             $user->refresh();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'User updated successfully',
-                'data' => $user,
-            ], Response::HTTP_OK);
+            return response()->apiSuccess('User updated successfully', $user);
 
         } catch (\Exception $e) {
             DB::rollBack();
