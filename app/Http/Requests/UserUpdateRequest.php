@@ -24,8 +24,8 @@ class UserUpdateRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => 'sometimes|required|string|max:255',
-            'avatar' => 'sometimes|nullable',
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'avatar' => ['sometimes', 'nullable'],
             'email' => ['sometimes', 'required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore(auth()->id())],
             'password' => ['sometimes', 'required', 'confirmed', Password::defaults()],
         ];

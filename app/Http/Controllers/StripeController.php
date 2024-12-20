@@ -57,7 +57,7 @@ class StripeController extends BaseController
             return response()->apiSuccess('Payment sheet params fetched successfully', $response);
 
         } catch (\Exception $e) {
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch payment sheet params');
+            return response()->apiError('Failed to fetch payment sheet params', $e->getMessage());
         }
     }
 }

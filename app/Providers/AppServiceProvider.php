@@ -39,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
             return response()->json([
                 'success' => true,
                 'message' => $message,
-                'data' => $data,
+                'data' => empty($data) ? [] : (is_array($data) ? $data : [$data]),
             ], $status);
         });
 
@@ -47,7 +47,7 @@ class AppServiceProvider extends ServiceProvider
             return response()->json([
                 'success' => true,
                 'message' => $message,
-                'errors' => $errors,
+                'errors' => empty($data) ? [] : (is_array($errors) ? $errors : [$errors]),
             ], $status);
         });
     }

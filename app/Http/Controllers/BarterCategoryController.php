@@ -27,7 +27,7 @@ class BarterCategoryController extends BaseController
             return response()->apiSuccess('Categories fetched successfully', $barter_categories);
 
         } catch (\Exception $e) {
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch categories');
+            return response()->apiError('Failed to fetch categories', $e->getMessage());
         }
     }
 }

@@ -34,7 +34,7 @@ class UserController extends BaseController
 
             $validated = $request->validated();
 
-            $user->update(Arr::except($validated, ['image']));
+            $user->update(Arr::except($validated, ['avatar']));
 
             $user->clearMediaCollection('user_avatar');
 
@@ -54,7 +54,7 @@ class UserController extends BaseController
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to update user');
+            return response()->apiError('Failed to update user', $e->getMessage());
         }
     }
 }

@@ -40,23 +40,22 @@ class AuthController extends BaseController
                 'password' => Hash::make($request->password),
             ]);
 
-            DB::commit();
-
             $request->authenticate();
             $token = $user->createToken('auth-token')->plainTextToken;
-
             $response = [
                 'token' => $token,
                 'token_type' => 'Bearer',
-                'user' => auth()->user()->load('barter_services'),
+                'user' => auth()->user(),
             ];
+
+            DB::commit();
 
             return response()->apiSuccess('Registered successfully', $response, Response::HTTP_CREATED);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to register');
+            return response()->apiError('Failed to register', $e->getMessage());
         }
     }
 
@@ -86,18 +85,18 @@ class AuthController extends BaseController
             $response = [
                 'token' => $token,
                 'token_type' => 'Bearer',
-                'user' => auth()->user()->load('barter_services'),
+                'user' => auth()->user(),
             ];
 
             return response()->apiSuccess('Logged in successfully', $response);
 
         } catch (ValidationException $e) {
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Invalid credentials');
+            return response()->apiError('Invalid credentials', $e->getMessage());
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to login');
+            return response()->apiError('Failed to login', $e->getMessage());
         }
     }
 
@@ -124,7 +123,7 @@ class AuthController extends BaseController
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to logout');
+            return response()->apiError('Failed to logout', $e->getMessage());
         }
     }
 
@@ -145,12 +144,10 @@ class AuthController extends BaseController
                 auth()->user()->load('barter_services'),
             );
 
-            \Illuminate\Support\Facades\Log::debug($response);
-
             return $response;
 
         } catch (\Exception $e) {
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch authenticated user');
+            return response()->apiError('Failed to fetch authenticated user', $e->getMessage());
         }
     }
 }

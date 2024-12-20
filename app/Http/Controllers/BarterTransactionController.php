@@ -34,7 +34,7 @@ class BarterTransactionController extends BaseController
             $barter_service_id = $request->input('barter_service_id');
 
             if (! in_array($mode, ['incoming', 'outgoing', 'ongoing', 'history'])) {
-                abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Invalid transaction mode');
+                throw new \Exception('Invalid transaction mode', Response::HTTP_BAD_REQUEST);
             }
 
             $query = BarterTransaction::query()
@@ -72,7 +72,7 @@ class BarterTransactionController extends BaseController
             return response()->apiSuccess('Transactions fetched successfully', $barter_transactions);
 
         } catch (\Exception $e) {
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch transactions');
+            return response()->apiError('Failed to fetch transactions', $e->getMessage());
         }
     }
 
@@ -88,13 +88,18 @@ class BarterTransactionController extends BaseController
     public function show(string $barter_transaction_id): JsonResponse
     {
         try {
-            $barter_transaction = BarterTransaction::with('barter_acquirer', 'barter_provider', 'barter_service', 'barter_invoice')
+            $barter_transaction = BarterTransaction::with([
+                'barter_acquirer',
+                'barter_provider',
+                'barter_service',
+                'barter_invoice',
+            ])
                 ->findOrFail($barter_transaction_id);
 
             return response()->apiSuccess('Transaction detail fetched successfully', $barter_transaction);
 
         } catch (\Exception $e) {
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch transaction detail');
+            return response()->apiError('Failed to fetch transaction detail', $e->getMessage());
         }
     }
 
@@ -135,12 +140,12 @@ class BarterTransactionController extends BaseController
 
             DB::commit();
 
-            return response()->apiSuccess('Transaction created successfully', $barter_transaction);
+            return response()->apiSuccess('Transaction created successfully', $barter_transaction, Response::HTTP_CREATED);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to create transaction');
+            return response()->apiError('Failed to create transaction', $e->getMessage());
         }
     }
 
@@ -167,12 +172,14 @@ class BarterTransactionController extends BaseController
 
             DB::commit();
 
+            $barter_transaction->refresh();
+
             return response()->apiSuccess('Transaction updated successfully', $barter_transaction);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to update transaction');
+            return response()->apiError('Failed to update transaction', $e->getMessage());
         }
     }
 
@@ -203,7 +210,7 @@ class BarterTransactionController extends BaseController
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to delete transaction');
+            return response()->apiError('Failed to delete transaction', $e->getMessage());
         }
     }
 }

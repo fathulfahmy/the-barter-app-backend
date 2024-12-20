@@ -27,7 +27,11 @@ class BarterInvoiceController extends BaseController
     public function index(): JsonResponse
     {
         try {
-            $barter_invoices = BarterInvoice::with('barter_transaction.barter_service', 'barter_transaction.barter_acquirer', 'barter_services')
+            $barter_invoices = BarterInvoice::with([
+                'barter_transaction.barter_service',
+                'barter_transaction.barter_acquirer',
+                'barter_transaction.barter_provider',
+            ])
                 ->where('barter_acquirer_id', auth()->id())
                 ->paginate(config('app.default.pagination'));
 
@@ -36,7 +40,7 @@ class BarterInvoiceController extends BaseController
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch invoices');
+            return response()->apiError('Failed to fetch invoices', $e->getMessage());
         }
     }
 
@@ -52,7 +56,11 @@ class BarterInvoiceController extends BaseController
     public function show(string $barter_invoice_id): JsonResponse
     {
         try {
-            $barter_invoice = BarterInvoice::with('barter_transaction.barter_service', 'barter_transaction.barter_acquirer', 'barter_transaction.barter_provider', 'barter_services')
+            $barter_invoice = BarterInvoice::with([
+                'barter_transaction.barter_service',
+                'barter_transaction.barter_acquirer',
+                'barter_transaction.barter_provider',
+            ])
                 ->findOrFail($barter_invoice_id);
 
             return response()->apiSuccess('Invoice detail fetched successfully', $barter_invoice);
@@ -60,7 +68,7 @@ class BarterInvoiceController extends BaseController
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch invoice detail');
+            return response()->apiError('Failed to fetch invoice detail', $e->getMessage());
         }
     }
 
@@ -88,12 +96,12 @@ class BarterInvoiceController extends BaseController
 
             DB::commit();
 
-            return response()->apiSuccess('Invoice created successfully', $barter_invoice);
+            return response()->apiSuccess('Invoice created successfully', $barter_invoice, Response::HTTP_CREATED);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to create invoice');
+            return response()->apiError('Failed to create invoice', $e->getMessage());
         }
     }
 
@@ -124,12 +132,14 @@ class BarterInvoiceController extends BaseController
 
             DB::commit();
 
+            $barter_invoice->refresh();
+
             return response()->apiSuccess('Invoice updated successfully', $barter_invoice);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to update invoice');
+            return response()->apiError('Failed to update invoice', $e->getMessage());
         }
     }
 
@@ -160,7 +170,7 @@ class BarterInvoiceController extends BaseController
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to delete invoice');
+            return response()->apiError('Failed to delete invoice', $e->getMessage());
         }
     }
 }

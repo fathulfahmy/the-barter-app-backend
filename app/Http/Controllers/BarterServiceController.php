@@ -32,12 +32,12 @@ class BarterServiceController extends BaseController
             $mode = $request->input('mode');
 
             if (! in_array($mode, ['acquire', 'provide'])) {
-                abort(Response::HTTP_BAD_REQUEST, 'Invalid service mode');
+                throw new \Exception('Invalid service mode', Response::HTTP_BAD_REQUEST);
             }
 
             $query = BarterService::query()
                 ->when($mode === 'acquire', function ($query) {
-                    $query->with('barter_provider', 'barter_category')
+                    $query->with(['barter_category', 'barter_provider'])
                         ->whereNot('barter_provider_id', auth()->id())
                         ->where('status', 'enabled')
                         ->inRandomOrder();
@@ -53,7 +53,7 @@ class BarterServiceController extends BaseController
             return response()->apiSuccess('Services fetched successfully', $barter_services);
 
         } catch (\Exception $e) {
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch services');
+            return response()->apiError('Failed to fetch services', $e->getMessage());
         }
     }
 
@@ -69,13 +69,16 @@ class BarterServiceController extends BaseController
     public function show(string $barter_service_id): JsonResponse
     {
         try {
-            $barter_service = BarterService::with('barter_provider', 'barter_category')
+            $barter_service = BarterService::with([
+                'barter_category',
+                'barter_provider',
+            ])
                 ->findOrFail($barter_service_id);
 
             return response()->apiSuccess('Service detail fetched successfully', $barter_service);
 
         } catch (\Exception $e) {
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to fetch services');
+            return response()->apiError('Failed to fetch services', $e->getMessage());
         }
     }
 
@@ -106,12 +109,12 @@ class BarterServiceController extends BaseController
             }
             DB::commit();
 
-            return response()->apiSuccess('Service created successfully', $barter_service);
+            return response()->apiSuccess('Service created successfully', $barter_service, Response::HTTP_CREATED);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to create service');
+            return response()->apiError('Failed to create service', $e->getMessage());
         }
     }
 
@@ -156,7 +159,7 @@ class BarterServiceController extends BaseController
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to update service');
+            return response()->apiError('Failed to update service', $e->getMessage());
         }
     }
 
@@ -187,7 +190,7 @@ class BarterServiceController extends BaseController
         } catch (\Exception $e) {
             DB::rollBack();
 
-            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Failed to delete service');
+            return response()->apiError('Failed to delete service', $e->getMessage());
         }
     }
 }
