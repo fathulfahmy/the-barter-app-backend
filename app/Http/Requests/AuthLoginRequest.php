@@ -26,7 +26,13 @@ class AuthLoginRequest extends BaseRequest
     public function rules(): array
     {
         return [
+            /**
+             * @example "user@demo.com"
+             */
             'email' => ['required', 'string', 'email'],
+            /**
+             * @example "password"
+             */
             'password' => ['required', 'string'],
         ];
     }

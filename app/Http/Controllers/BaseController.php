@@ -27,4 +27,27 @@ class BaseController extends Controller
 
         return $filename;
     }
+
+    /**
+     * Get time difference in specified format
+     *
+     * @param  \Carbon\Carbon  $time1
+     * @param  \Carbon\Carbon|null  $time2
+     */
+    public function formatTimeDiff($time1, $time2 = null): string
+    {
+        $time2 = $time2 ?: now();
+
+        $diff_in_days = $time1->diffInDays($time2);
+
+        if ($diff_in_days < 1) {
+            return $time1->format('h:i A');
+        } elseif ($diff_in_days < 2) {
+            return 'Yesterday';
+        } elseif ($diff_in_days < 7) {
+            return $time1->format('l');
+        } else {
+            return $time1->format('d/m/Y');
+        }
+    }
 }

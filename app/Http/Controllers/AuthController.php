@@ -139,12 +139,9 @@ class AuthController extends BaseController
     public function me(): JsonResponse
     {
         try {
-            $response = response()->apiSuccess(
-                'Fetched authenticated user successfully',
-                auth()->user()->load('barter_services'),
-            );
+            $response = auth()->user()->load('barter_services');
 
-            return $response;
+            return response()->apiSuccess('Fetched authenticated user successfully', $response);
 
         } catch (\Exception $e) {
             return response()->apiError('Failed to fetch authenticated user', $e->getMessage());

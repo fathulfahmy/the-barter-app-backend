@@ -39,15 +39,15 @@ class AppServiceProvider extends ServiceProvider
             return response()->json([
                 'success' => true,
                 'message' => $message,
-                'data' => empty($data) ? [] : (is_array($data) ? $data : [$data]),
+                'data' => $data,
             ], $status);
         });
 
         Response::macro('apiError', function (string $message = '', mixed $errors = [], int $status = 500): JsonResponse {
             return response()->json([
-                'success' => true,
+                'success' => false,
                 'message' => $message,
-                'errors' => empty($data) ? [] : (is_array($errors) ? $errors : [$errors]),
+                'errors' => $errors,
             ], $status);
         });
     }

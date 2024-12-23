@@ -19,8 +19,23 @@ class BaseModel extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
+    protected $hidden = [
+        'media',
+        'pivot',
+    ];
+
     protected $casts = [
         'id' => 'string',
+        'user_id' => 'string',
+        'barter_provider_id' => 'string',
+        'barter_acquirer_id' => 'string',
+        'author_id' => 'string',
+        'barter_service_id' => 'string',
+        'barter_transaction_id' => 'string',
+        'barter_invoice_id' => 'string',
+        'barter_review_id' => 'string',
+        'chat_conversation_id' => 'string',
+        'chat_message_id' => 'string',
         'min_price' => 'float',
         'max_price' => 'float',
         'amount' => 'float',

@@ -21,7 +21,7 @@ class BarterReviewStoreRequest extends BaseRequest
     {
         return [
             'barter_transaction_id' => 'required|exists:barter_transactions,id',
-            'description' => 'required|string',
+            'description' => 'required|string|min:1|max:65535',
             'rating' => 'required|numeric|min:0|max:5',
         ];
     }
