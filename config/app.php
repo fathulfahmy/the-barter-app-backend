@@ -144,4 +144,8 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    'stream_chat' => [
+        'key' => env('STREAM_CHAT_KEY'),
+        'secret' => env('STREAM_CHAT_SECRET'),
+    ],
 ];

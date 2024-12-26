@@ -47,14 +47,12 @@ class StripeController extends BaseController
                 'customer' => $customer->id,
             ]);
 
-            $response = [
+            return response()->apiSuccess('Payment sheet params fetched successfully', [
                 'payment_intent' => $payment_intent->client_secret,
                 'ephemeral_key' => $ephemeral_key->secret,
                 'customer' => $customer->id,
                 'publishable_key' => config('app.stripe.publishable'),
-            ];
-
-            return response()->apiSuccess('Payment sheet params fetched successfully', $response);
+            ]);
 
         } catch (\Exception $e) {
             return response()->apiError('Failed to fetch payment sheet params', $e->getMessage());

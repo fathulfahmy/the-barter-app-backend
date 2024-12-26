@@ -9,6 +9,7 @@ use App\Models\BarterService;
 use App\Models\BarterTransaction;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use GetStream\StreamChat\Client;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,24 +20,57 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->clearMedia();
         $this->seedUsers(10);
+        $this->seedStreamChatUsers();
         $this->seedBarterCategories(10);
         $this->seedBarterServices(5);
         $this->seedBarterTransactions(count: 1000);
-        $this->clearMedia();
 
         $this->command->info('Seeding complete!');
+    }
+
+    protected function clearMedia()
+    {
+        $this->command->info('Clearing media...');
+
+        if (Storage::disk('public')->exists('media')) {
+            Storage::disk('public')->deleteDirectory('media');
+            Storage::disk('public')->makeDirectory('media');
+        }
     }
 
     protected function seedUsers(int $count): void
     {
         $this->command->info("Seeding $count users...");
 
-        User::factory()->create([
-            'name' => 'Demo User',
-            'email' => 'user@demo.com',
-        ]);
-        User::factory($count - 1)->create();
+        for ($i = 0; $i < $count; $i++) {
+            if ($i === 0) {
+                $user = User::factory()->create([
+                    'name' => 'Demo User',
+                    'email' => 'user@demo.com',
+                ]);
+            } else {
+                $user = User::factory()->create();
+            }
+        }
+    }
+
+    protected function seedStreamChatUsers()
+    {
+        $this->command->info('Seeding stream chat users...');
+
+        $users = User::all();
+        foreach ($users as $user) {
+            $chat_client = new Client(config('app.stream_chat.key'), config('app.stream_chat.secret'));
+            $chat_client->upsertUsers([
+                [
+                    'id' => (string) $user->id,
+                    'name' => $user->name,
+                    'role' => 'user',
+                ],
+            ]);
+        }
     }
 
     protected function seedBarterCategories(int $count): void
@@ -98,16 +132,6 @@ class DatabaseSeeder extends Seeder
                     }
                 }
             }
-        }
-    }
-
-    protected function clearMedia()
-    {
-        $this->command->info('Clearing media...');
-
-        if (Storage::disk('public')->exists('media')) {
-            Storage::disk('public')->deleteDirectory('media');
-            Storage::disk('public')->makeDirectory('media');
         }
     }
 }

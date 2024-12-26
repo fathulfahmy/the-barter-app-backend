@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AuthLoginRequest;
 use App\Http\Requests\AuthRegisterRequest;
 use App\Models\User;
+use GetStream\StreamChat\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -23,7 +24,8 @@ class AuthController extends BaseController
      *      success: bool,
      *      message: string,
      *      data: array{
-     *          token: string,
+     *          auth_token: string,
+     *          chat_token: string,
      *          token_type: 'Bearer',
      *          user: User,
      *      }
@@ -41,16 +43,27 @@ class AuthController extends BaseController
             ]);
 
             $request->authenticate();
-            $token = $user->createToken('auth-token')->plainTextToken;
-            $response = [
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'user' => auth()->user(),
-            ];
+            $auth_token = $user->createToken('auth-token')->plainTextToken;
+
+            $chat_client = new Client(config('app.stream_chat.key'), config('app.stream_chat.secret'));
+            $chat_token = $chat_client->createToken((string) $user->id);
+
+            $chat_client->upsertUsers([
+                [
+                    'id' => (string) $user->id,
+                    'name' => $user->name,
+                    'role' => 'user',
+                ],
+            ]);
 
             DB::commit();
 
-            return response()->apiSuccess('Registered successfully', $response, Response::HTTP_CREATED);
+            return response()->apiSuccess('Registered successfully', [
+                'auth_token' => $auth_token,
+                'chat_token' => $chat_token,
+                'token_type' => 'Bearer',
+                'user' => auth()->user(),
+            ], Response::HTTP_CREATED);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -66,7 +79,8 @@ class AuthController extends BaseController
      *      success: bool,
      *      message: string,
      *      data: array{
-     *          token: string,
+     *          auth_token: string,
+     *          chat_token: string,
      *          token_type: 'Bearer',
      *          user: User,
      *      }
@@ -78,17 +92,19 @@ class AuthController extends BaseController
             DB::beginTransaction();
 
             $request->authenticate();
-            $token = auth()->user()->createToken('auth-token')->plainTextToken;
+            $auth_token = auth()->user()->createToken('auth-token')->plainTextToken;
+
+            $chat_client = new Client(config('app.stream_chat.key'), config('app.stream_chat.secret'));
+            $chat_token = $chat_client->createToken((string) auth()->id());
 
             DB::commit();
 
-            $response = [
-                'token' => $token,
+            return response()->apiSuccess('Logged in successfully', [
+                'auth_token' => $auth_token,
+                'chat_token' => $chat_token,
                 'token_type' => 'Bearer',
                 'user' => auth()->user(),
-            ];
-
-            return response()->apiSuccess('Logged in successfully', $response);
+            ]);
 
         } catch (ValidationException $e) {
             return response()->apiError('Invalid credentials', $e->getMessage());
@@ -139,9 +155,9 @@ class AuthController extends BaseController
     public function me(): JsonResponse
     {
         try {
-            $response = auth()->user()->load('barter_services');
+            $user = auth()->user()->load('barter_services');
 
-            return response()->apiSuccess('Fetched authenticated user successfully', $response);
+            return response()->apiSuccess('Fetched authenticated user successfully', $user);
 
         } catch (\Exception $e) {
             return response()->apiError('Failed to fetch authenticated user', $e->getMessage());

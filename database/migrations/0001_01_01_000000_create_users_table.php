@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+use GetStream\StreamChat\Client;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -43,8 +45,22 @@ return new class extends Migration
      */
     public function down(): void
     {
+        $this->deleteStreamChatUsers();
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+    }
+
+    public function deleteStreamChatUsers()
+    {
+        $user_ids = User::pluck('id');
+        foreach ($user_ids as $user_id) {
+            $chat_client = new Client(config('app.stream_chat.key'), config('app.stream_chat.secret'));
+            $chat_client->deleteUser((string) $user_id, [
+                'mark_messages_deleted' => true,
+                'hard_delete' => true,
+                'delete_conversation_channels' => true,
+            ]);
+        }
     }
 };
