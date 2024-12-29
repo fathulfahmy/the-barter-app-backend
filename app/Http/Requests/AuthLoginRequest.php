@@ -27,7 +27,7 @@ class AuthLoginRequest extends BaseRequest
     {
         return [
             /**
-             * @example "user@demo.com"
+             * @example "user1@demo.com"
              */
             'email' => ['required', 'string', 'email'],
             /**

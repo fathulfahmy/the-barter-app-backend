@@ -47,8 +47,13 @@ class DatabaseSeeder extends Seeder
         for ($i = 0; $i < $count; $i++) {
             if ($i === 0) {
                 $user = User::factory()->create([
-                    'name' => 'Demo User',
-                    'email' => 'user@demo.com',
+                    'name' => 'Demo User 1',
+                    'email' => 'user1@demo.com',
+                ]);
+            } else if ($i === 1) {
+                $user = User::factory()->create([
+                    'name' => 'Demo User 2',
+                    'email' => 'user2@demo.com',
                 ]);
             } else {
                 $user = User::factory()->create();

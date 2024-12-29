@@ -130,7 +130,7 @@ class AuthController extends BaseController
         try {
             DB::beginTransaction();
 
-            auth()->user()->tokens()->delete();
+            auth()->user()->currentAccessToken()->delete();
 
             DB::commit();
 
