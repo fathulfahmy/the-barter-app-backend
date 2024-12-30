@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         $this->seedStreamChatUsers();
         $this->seedBarterCategories(10);
         $this->seedBarterServices(5);
+        $this->seedBarterServiceImages(5);
         $this->seedBarterTransactions(count: 1000);
 
         $this->command->info('Seeding complete!');
@@ -50,7 +51,7 @@ class DatabaseSeeder extends Seeder
                     'name' => 'Demo User 1',
                     'email' => 'user1@demo.com',
                 ]);
-            } else if ($i === 1) {
+            } elseif ($i === 1) {
                 $user = User::factory()->create([
                     'name' => 'Demo User 2',
                     'email' => 'user2@demo.com',
@@ -85,14 +86,27 @@ class DatabaseSeeder extends Seeder
         BarterCategory::factory($count)->create();
     }
 
-    protected function seedBarterServices(int $count_per_user): void
+    protected function seedBarterServices(int $service_per_user): void
     {
-        $this->command->info("Seeding $count_per_user services per user...");
+        $this->command->info("Seeding $service_per_user services per user...");
 
-        User::all()->each(function (User $user) use ($count_per_user) {
-            BarterService::factory($count_per_user)->create([
+        User::all()->each(function (User $user) use ($service_per_user) {
+            BarterService::factory($service_per_user)->create([
                 'barter_provider_id' => $user->id,
             ]);
+        });
+    }
+
+    protected function seedBarterServiceImages(int $image_per_service)
+    {
+        $this->command->info("Seeding $image_per_service images per service...");
+
+        BarterService::all()->each(function (BarterService $barter_service) use ($image_per_service) {
+            for ($i = 0; $i < $image_per_service; $i++) {
+                $barter_service
+                    ->addMediaFromUrl(config('app.default.image.uri'))
+                    ->toMediaCollection('barter_service_images');
+            }
         });
     }
 
