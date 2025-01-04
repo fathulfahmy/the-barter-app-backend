@@ -9,8 +9,11 @@
         "dedoc/scramble": "^0.11.28",
         "get-stream/stream-chat": "^3.6",
         "laravel/framework": "^11.9",
+        "laravel/prompts": "^0.3.2",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
+        "predis/predis": "2.0",
+        "pusher/pusher-php-server": "^7.2",
         "spatie/laravel-medialibrary": "^11.9",
         "stripe/stripe-php": "^16.3"
     },

@@ -3,12 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Auth\Authenticatable;
-use Illuminate\Auth\MustVerifyEmail;
-use Illuminate\Auth\Passwords\CanResetPassword;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\Access\Authorizable;
@@ -60,6 +55,12 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
+ *
+ * @property-read \App\Models\ChatConversationUser|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ChatConversation> $chat_conversations
+ * @property-read int|null $chat_conversations_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ChatMessage> $chat_messages
+ * @property-read int|null $chat_messages_count
  */
 class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
 {
@@ -125,6 +126,16 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
     public function barter_reviews(): HasMany
     {
         return $this->hasMany(BarterReview::class, 'author_id');
+    }
+
+    public function chat_conversations(): BelongsToMany
+    {
+        return $this->belongsToMany(ChatConversation::class)->using(ChatConversationUser::class);
+    }
+
+    public function chat_messages(): HasMany
+    {
+        return $this->hasMany(ChatMessage::class, 'author_id');
     }
 
     public function registerMediaCollections(): void

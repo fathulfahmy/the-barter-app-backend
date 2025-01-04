@@ -7,6 +7,8 @@ use App\Models\BarterInvoice;
 use App\Models\BarterReview;
 use App\Models\BarterService;
 use App\Models\BarterTransaction;
+use App\Models\ChatConversation;
+use App\Models\ChatMessage;
 use App\Models\User;
 use GetStream\StreamChat\Client;
 use Illuminate\Database\Seeder;
@@ -20,49 +22,24 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->clearMedia();
-        $this->clearChat();
         $this->seedUsers(10);
         $this->seedBarterCategories(10);
         $this->seedBarterServices(5);
         $this->seedBarterServiceImages(5);
         $this->seedBarterTransactions(count: 1000);
+        $this->seedMessages(2);
+
+        $this->command->info('Seeding complete!');
     }
 
     protected function clearMedia()
     {
+        $this->command->info('Clearing media...');
+
         if (Storage::disk('public')->exists('media')) {
             Storage::disk('public')->deleteDirectory('media');
             Storage::disk('public')->makeDirectory('media');
         }
-
-        $this->command->info('Cleared media directory');
-    }
-
-    protected function clearChat()
-    {
-        $chat_client = new Client(config('app.stream_chat.key'), config('app.stream_chat.secret'));
-
-        $filters = [
-            'role' => ['$eq' => 'user'],
-        ];
-        $query = $chat_client->queryUsers($filters);
-
-        if (count($query['users']) > 0) {
-            $user_ids = array_map(function ($user) {
-                return $user['id'];
-            }, $query['users']);
-
-            $chat_client->deleteUsers($user_ids, [
-                'user' => 'hard',
-                'messages' => 'hard',
-                'conversations' => 'hard',
-            ]);
-        }
-
-        // wait for stream chat api delete to complete to prevent conflict with upsertion
-        sleep(5);
-
-        $this->command->info('Cleared stream chat users, messages and conversations!');
     }
 
     protected function seedUsers(int $count): void
@@ -168,20 +145,40 @@ class DatabaseSeeder extends Seeder
                         ]);
                     }
 
-                    if (rand(0, 1)) {
-                        foreach ($barter_invoice->barter_services as $barter_service) {
-                            BarterReview::factory()->create([
-                                'author_id' => $barter_transaction->barter_provider_id,
-                                'barter_service_id' => $barter_service->id,
-                                'barter_transaction_id' => $barter_transaction->id,
-                            ]);
-                        }
-
+                    foreach ($barter_invoice->barter_services as $barter_service) {
+                        BarterReview::factory()->create([
+                            'author_id' => $barter_transaction->barter_provider_id,
+                            'barter_service_id' => $barter_service->id,
+                            'barter_transaction_id' => $barter_transaction->id,
+                        ]);
                     }
                 }
             }
         }
+    }
 
-        $this->command->info("Seeded $count transactions");
+    public function seedMessages($count_per_user)
+    {
+        $this->command->info("Seeding $count_per_user messages per user...");
+
+        $users = User::all();
+
+        $user = $users->first();
+        $other_users = $users->except($user->id);
+
+        foreach ($other_users as $other_user) {
+            $chat_conversation = ChatConversation::factory()->create();
+            $chat_conversation->users()->attach([$user->id, $other_user->id]);
+
+            ChatMessage::factory($count_per_user)->create([
+                'chat_conversation_id' => $chat_conversation->id,
+                'author_id' => $user->id,
+            ]);
+
+            ChatMessage::factory($count_per_user)->create([
+                'chat_conversation_id' => $chat_conversation->id,
+                'author_id' => $other_user->id,
+            ]);
+        }
     }
 }

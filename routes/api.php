@@ -6,6 +6,8 @@ use App\Http\Controllers\BarterInvoiceController;
 use App\Http\Controllers\BarterReviewController;
 use App\Http\Controllers\BarterServiceController;
 use App\Http\Controllers\BarterTransactionController;
+use App\Http\Controllers\ChatConversationController;
+use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +20,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // AUTH
     Route::post('/auth/logout', [AuthController::class, 'logout'])->name('api.auth.logout');
     Route::get('/auth/me', [AuthController::class, 'me'])->name('api.auth.me');
+
+    // USER
+    Route::patch('/users/{user_id}', [UserController::class, 'update'])->name('api.profile.update');
+
+    // BARTER CATEGORIES
+    Route::get('/barter_categories', [BarterCategoryController::class, 'index'])->name('api.barter_categories.index');
 
     // BARTER SERVICES
     Route::get('/barter_services', [BarterServiceController::class, 'index'])->name('api.barter_services.index');
@@ -47,12 +55,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/barter_reviews/{barter_review_id}', [BarterReviewController::class, 'update'])->name('api.barter_reviews.update');
     Route::delete('/barter_reviews/{barter_review_id}', [BarterReviewController::class, 'destroy'])->name('api.barter_reviews.destroy');
 
-    // BARTER CATEGORIES
-    Route::get('/barter_categories', [BarterCategoryController::class, 'index'])->name('api.barter_categories.index');
-
-    // USER
-    Route::patch('/users/{user_id}', [UserController::class, 'update'])->name('api.profile.update');
-
     // STRIPE
     Route::post('/stripe/payment_sheet', [StripeController::class, 'payment_sheet'])->name('api.stripe.payment_sheet');
+
+    // CHAT CONVERSATIONS
+    Route::get('/chat_conversations', [ChatConversationController::class, 'index'])->name('api.chat_conversations.index');
+    Route::get('/chat_conversations/{chat_conversation_id}', [ChatConversationController::class, 'show'])->name('api.chat_conversations.show');
+    Route::post('/chat_conversations', [ChatConversationController::class, 'store'])->name('api.chat_conversations.store');
+
+    // CHAT MESSAGES
+    Route::get('/chat_messages', [ChatMessageController::class, 'index'])->name('api.chat_messages.index');
+    Route::post('/chat_messages', [ChatMessageController::class, 'store'])->name('api.chat_messages.store');
 });
