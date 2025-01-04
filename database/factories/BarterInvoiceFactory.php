@@ -16,19 +16,10 @@ class BarterInvoiceFactory extends Factory
      */
     public function definition(): array
     {
-        $status = [
-            'pending',
-            'accepted',
-            'rejected',
-            // 'success',
-            // 'failed',
-        ];
-
         return [
             'barter_acquirer_id' => fake()->numberBetween(1, 10),
             'barter_transaction_id' => fake()->numberBetween(1, 50),
             'amount' => fake()->randomFloat(2, 1, 99),
-            'status' => fake()->randomElement($status),
         ];
     }
 }

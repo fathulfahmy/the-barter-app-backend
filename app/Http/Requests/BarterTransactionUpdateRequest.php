@@ -20,10 +20,10 @@ class BarterTransactionUpdateRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'amount' => 'nullable|numeric|min:0|max:99999999.99',
-            'barter_service_ids' => 'nullable|array',
+            'status' => 'sometimes|required|string',
+            'amount' => 'sometimes|nullable|numeric|min:0|max:99999999.99',
+            'barter_service_ids' => 'sometimes|nullable|array',
             'barter_service_ids.*' => 'exists:barter_services,id',
-            'status' => 'nullable|string',
         ];
     }
 }

@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $barter_acquirer_id
  * @property int $barter_transaction_id
  * @property float $amount
- * @property string $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -53,10 +52,9 @@ class BarterInvoice extends BaseModel
         'barter_acquirer_id',
         'barter_transaction_id',
         'amount',
-        'status',
     ];
 
-    protected $appends = ['exchanged_services'];
+    protected $with = ['barter_services'];
 
     public function barter_acquirer(): BelongsTo
     {
@@ -71,10 +69,5 @@ class BarterInvoice extends BaseModel
     public function barter_services(): BelongsToMany
     {
         return $this->belongsToMany(BarterService::class)->using(BarterInvoiceBarterService::class);
-    }
-
-    public function getExchangedServicesAttribute()
-    {
-        return $this->barter_services->pluck('title');
     }
 }

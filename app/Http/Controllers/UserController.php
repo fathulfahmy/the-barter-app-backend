@@ -36,14 +36,16 @@ class UserController extends BaseController
 
             $user->update(Arr::except($validated, ['avatar']));
 
-            $user->clearMediaCollection('user_avatar');
-
             if ($request->hasFile('avatar')) {
+                $user->clearMediaCollection('user_avatar');
+
                 $file = $request->file('avatar');
                 $user
                     ->addMedia($file)
                     ->toMediaCollection('user_avatar');
             }
+
+            $this->upsertChatUser($user);
 
             DB::commit();
 

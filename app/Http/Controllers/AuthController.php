@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AuthLoginRequest;
 use App\Http\Requests\AuthRegisterRequest;
 use App\Models\User;
-use GetStream\StreamChat\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -45,16 +44,8 @@ class AuthController extends BaseController
             $request->authenticate();
             $auth_token = $user->createToken('auth-token')->plainTextToken;
 
-            $chat_client = new Client(config('app.stream_chat.key'), config('app.stream_chat.secret'));
-            $chat_token = $chat_client->createToken((string) $user->id);
-
-            $chat_client->upsertUsers([
-                [
-                    'id' => (string) $user->id,
-                    'name' => $user->name,
-                    'role' => 'user',
-                ],
-            ]);
+            $this->upsertChatUser($user);
+            $chat_token = $this->createChatToken($user->id);
 
             DB::commit();
 
@@ -92,10 +83,11 @@ class AuthController extends BaseController
             DB::beginTransaction();
 
             $request->authenticate();
-            $auth_token = auth()->user()->createToken('auth-token')->plainTextToken;
+            $user = auth()->user();
+            $auth_token = $user->createToken('auth-token')->plainTextToken;
 
-            $chat_client = new Client(config('app.stream_chat.key'), config('app.stream_chat.secret'));
-            $chat_token = $chat_client->createToken((string) auth()->id());
+            $this->upsertChatUser($user);
+            $chat_token = $this->createChatToken($user->id);
 
             DB::commit();
 

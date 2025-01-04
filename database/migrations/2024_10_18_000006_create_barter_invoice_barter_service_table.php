@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('barter_invoice_barter_service', function (Blueprint $table) {
             $table->unsignedBigInteger('barter_invoice_id');
+            $table->foreign('barter_invoice_id')->references('id')->on('barter_invoices');
+
             $table->unsignedBigInteger('barter_service_id');
-            $table->foreign('barter_invoice_id')->references('id')->on('barter_invoices')->onDelete('cascade');
             $table->foreign('barter_service_id')->references('id')->on('barter_services');
         });
     }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use GetStream\StreamChat\Client;
+
 class BaseController extends Controller
 {
     public function getBase64File($base64)
@@ -49,5 +51,27 @@ class BaseController extends Controller
         } else {
             return $time1->format('d/m/Y');
         }
+    }
+
+    public function upsertChatUser(mixed $user): void
+    {
+        $chat_client = new Client(config('app.stream_chat.key'), config('app.stream_chat.secret'));
+
+        $chat_client->upsertUsers([
+            [
+                'id' => (string) $user->id,
+                'name' => $user->name,
+                'role' => 'user',
+                'image' => $user->avatar['uri'],
+            ],
+        ]);
+    }
+
+    public function createChatToken($user_id): string
+    {
+        $chat_client = new Client(config('app.stream_chat.key'), config('app.stream_chat.secret'));
+        $chat_token = $chat_client->createToken((string) $user_id);
+
+        return $chat_token;
     }
 }

@@ -22,7 +22,7 @@ class BarterServiceStoreRequest extends BaseRequest
         return [
             'barter_category_id' => 'required|exists:barter_categories,id',
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'required|string|max:65535',
             'min_price' => 'required|numeric|min:0|max:99999999.99',
             'max_price' => 'required|numeric|min:0|max:99999999.99|gte:min_price',
             'price_unit' => 'required|string|max:255',

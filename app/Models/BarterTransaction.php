@@ -40,6 +40,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction withoutTrashed()
+ *
+ * @property string|null $awaiting_completed_user_id
+ * @property-read \App\Models\User|null $awaiting_completed_user
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction whereAwaitingCompletedUserId($value)
  */
 class BarterTransaction extends BaseModel
 {
@@ -53,6 +58,7 @@ class BarterTransaction extends BaseModel
     protected $fillable = [
         'barter_acquirer_id',
         'barter_provider_id',
+        'awaiting_completed_user_id',
         'barter_service_id',
         'status',
     ];
@@ -65,6 +71,11 @@ class BarterTransaction extends BaseModel
     public function barter_provider(): BelongsTo
     {
         return $this->belongsTo(User::class, 'barter_provider_id');
+    }
+
+    public function awaiting_completed_user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'awaiting_completed_user_id');
     }
 
     public function barter_service(): BelongsTo

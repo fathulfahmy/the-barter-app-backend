@@ -140,9 +140,10 @@ class BarterServiceController extends BaseController
 
             $barter_service->update(Arr::except($validated, ['images']));
 
-            $barter_service->clearMediaCollection('barter_service_images');
-
             if ($request->hasFile('images')) {
+
+                $barter_service->clearMediaCollection('barter_service_images');
+
                 foreach ($request->file('images') as $file) {
                     $barter_service
                         ->addMedia($file)

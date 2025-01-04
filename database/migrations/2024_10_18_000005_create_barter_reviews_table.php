@@ -13,14 +13,18 @@ return new class extends Migration
     {
         Schema::create('barter_reviews', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('author_id');
-            $table->unsignedBigInteger('barter_service_id');
-            $table->unsignedBigInteger('barter_transaction_id');
-            $table->foreign('author_id')->references('id')->on('users');
-            $table->foreign('barter_service_id')->references('id')->on('barter_services');
-            $table->foreign('barter_transaction_id')->references('id')->on('barter_transactions');
             $table->text('description');
             $table->decimal('rating', 2, 1)->default(0);
+
+            $table->unsignedBigInteger('author_id');
+            $table->foreign('author_id')->references('id')->on('users');
+
+            $table->unsignedBigInteger('barter_service_id')->nullable();
+            $table->foreign('barter_service_id')->references('id')->on('barter_services');
+
+            $table->unsignedBigInteger('barter_transaction_id');
+            $table->foreign('barter_transaction_id')->references('id')->on('barter_transactions');
+
             $table->timestamps();
             $table->softDeletes();
         });

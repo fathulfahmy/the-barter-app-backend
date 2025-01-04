@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('barter_invoices', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('barter_acquirer_id');
-            $table->unsignedBigInteger('barter_transaction_id');
-            $table->foreign('barter_acquirer_id')->references('id')->on('users');
-            $table->foreign('barter_transaction_id')->references('id')->on('barter_transactions');
             $table->decimal('amount', 10, 2)->default(0);
-            $table->enum('status', ['pending', 'accepted', 'rejected', 'success', 'failed'])->default('pending');
+
+            $table->unsignedBigInteger('barter_acquirer_id');
+            $table->foreign('barter_acquirer_id')->references('id')->on('users');
+
+            $table->unsignedBigInteger('barter_transaction_id');
+            $table->foreign('barter_transaction_id')->references('id')->on('barter_transactions');
+
             $table->timestamps();
             $table->softDeletes();
         });

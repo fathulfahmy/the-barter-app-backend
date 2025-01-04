@@ -13,13 +13,21 @@ return new class extends Migration
     {
         Schema::create('barter_transactions', function (Blueprint $table) {
             $table->id();
+
+            $table->enum('status', ['pending', 'accepted', 'rejected', 'awaiting_completed', 'completed', 'cancelled'])->default('pending');
+
             $table->unsignedBigInteger('barter_acquirer_id');
-            $table->unsignedBigInteger('barter_provider_id');
-            $table->unsignedBigInteger('barter_service_id');
             $table->foreign('barter_acquirer_id')->references('id')->on('users');
+
+            $table->unsignedBigInteger('barter_provider_id');
             $table->foreign('barter_provider_id')->references('id')->on('users');
+
+            $table->unsignedBigInteger('awaiting_completed_user_id')->nullable();
+            $table->foreign('awaiting_completed_user_id')->references('id')->on('users');
+
+            $table->unsignedBigInteger('barter_service_id');
             $table->foreign('barter_service_id')->references('id')->on('barter_services');
-            $table->enum('status', ['pending', 'accepted', 'rejected', 'completed', 'cancelled'])->default('pending');
+
             $table->timestamps();
             $table->softDeletes();
         });

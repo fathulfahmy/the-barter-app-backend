@@ -20,7 +20,7 @@ class BarterReviewUpdateRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'description' => 'sometimes|required|string',
+            'description' => 'sometimes|required|string|min:1|max:65535',
             'rating' => 'sometimes|required|numeric|min:0|max:5',
         ];
     }

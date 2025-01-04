@@ -94,13 +94,29 @@ class BarterReviewController extends BaseController
             DB::beginTransaction();
 
             $validated = $request->validated();
-            $validated['author_id'] = auth()->id();
 
             $barter_transaction = BarterTransaction::findOrFail($validated['barter_transaction_id']);
+            $is_user_acquirer = auth()->id() == $barter_transaction->barter_acquirer_id;
 
-            $validated['barter_service_id'] = $barter_transaction->barter_service_id;
+            $validated['author_id'] = auth()->id();
+            $validated['barter_transaction_id'] = $barter_transaction->id;
 
-            $barter_review = BarterReview::create($validated);
+            if ($is_user_acquirer) {
+                $validated['barter_service_id'] = $barter_transaction->barter_service_id;
+
+                $barter_review = BarterReview::create($validated);
+            } else {
+
+                if ($barter_transaction->barter_invoice->barter_services) {
+                    foreach ($barter_transaction->barter_invoice->barter_services as $barter_service) {
+                        $validated['barter_service_id'] = $barter_service->id;
+                        $barter_review = BarterReview::create($validated);
+                    }
+                } else {
+                    $barter_review = BarterReview::create($validated);
+                }
+
+            }
 
             DB::commit();
 

@@ -13,10 +13,6 @@ return new class extends Migration
     {
         Schema::create('barter_services', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('barter_provider_id');
-            $table->unsignedBigInteger('barter_category_id');
-            $table->foreign('barter_provider_id')->references('id')->on('users');
-            $table->foreign('barter_category_id')->references('id')->on('barter_categories');
             $table->string('title');
             $table->text('description');
             $table->decimal('min_price', 10, 2)->default('0');
@@ -24,6 +20,13 @@ return new class extends Migration
             $table->string('price_unit');
             $table->decimal('rating', 2, 1)->default('0');
             $table->enum('status', ['enabled', 'disabled'])->default('enabled');
+
+            $table->unsignedBigInteger('barter_provider_id');
+            $table->foreign('barter_provider_id')->references('id')->on('users');
+
+            $table->unsignedBigInteger('barter_category_id');
+            $table->foreign('barter_category_id')->references('id')->on('barter_categories');
+
             $table->timestamps();
             $table->softDeletes();
         });

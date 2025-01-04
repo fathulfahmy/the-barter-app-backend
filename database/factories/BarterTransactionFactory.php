@@ -20,6 +20,7 @@ class BarterTransactionFactory extends Factory
             'pending',
             'accepted',
             'rejected',
+            'awaiting_completed',
             'completed',
             'cancelled',
         ];

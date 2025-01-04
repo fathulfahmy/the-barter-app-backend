@@ -54,14 +54,14 @@ class BarterTransactionController extends BaseController
                     $query->where(function ($q) {
                         $q->where('barter_acquirer_id', auth()->id())
                             ->orWhere('barter_provider_id', auth()->id());
-                    })->where('status', 'accepted');
+                    })->whereIn('status', ['accepted', 'awaiting_completed']);
                 })
                 ->when($mode === 'history', function ($query) {
                     $query->where(function ($q) {
                         $q->where('barter_acquirer_id', auth()->id())
                             ->orWhere('barter_provider_id', auth()->id());
                     })
-                        ->whereIn('status', ['rejected', 'cancelled', 'completed'])
+                        ->whereIn('status', ['rejected', 'completed'])
                         ->with('barter_reviews');
                 });
 
@@ -168,6 +168,17 @@ class BarterTransactionController extends BaseController
             Gate::authorize('update', $barter_transaction);
 
             $validated = $request->validated();
+
+            if ($validated['status'] && ($validated['status'] === 'completed' || $validated['status'] === 'awaiting_completed')) {
+                if ($barter_transaction->status === 'awaiting_completed') {
+                    $validated['status'] = 'completed';
+                    $validated['awaiting_completed_user_id'] = null;
+                } else {
+                    $validated['status'] = 'awaiting_completed';
+                    $validated['awaiting_completed_user_id'] = auth()->id();
+                }
+            }
+
             $barter_transaction->update($validated);
 
             DB::commit();

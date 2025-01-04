@@ -22,10 +22,10 @@ class BarterServiceUpdateRequest extends BaseRequest
         return [
             'barter_category_id' => 'sometimes|required|exists:barter_categories,id',
             'title' => 'sometimes|required|string|max:255',
-            'description' => 'sometimes|required|string',
+            'description' => 'sometimes|required|string|max:65535',
             'min_price' => 'required_with:max_price|numeric|min:0|max:99999999.99',
             'max_price' => 'required_with:min_price|numeric|min:0|max:99999999.99|gte:min_price',
-            'price_unit' => 'sometimes|string|max:255',
+            'price_unit' => 'sometimes|required|string|max:255',
             'status' => 'sometimes|required|string',
             'images' => 'sometimes|nullable',
             'images.*' => 'sometimes|nullable',
