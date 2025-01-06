@@ -30,12 +30,22 @@ class BarterServiceController extends BaseController
     {
         try {
             $mode = $request->input('mode');
+            $search = $request->input('search');
+            $categories = $request->input('categories', []);
 
             if (! in_array($mode, ['acquire', 'provide'])) {
                 throw new \Exception('Invalid service mode', Response::HTTP_BAD_REQUEST);
             }
 
             $query = BarterService::query()
+                ->when(! empty($search), function ($query) use ($search) {
+                    $query->where(function ($query) use ($search) {
+                        $query->where('title', 'like', "%{$search}%");
+                    });
+                })
+                ->when(! empty($categories), function ($query) use ($categories) {
+                    $query->whereIn('barter_category_id', $categories);
+                })
                 ->when($mode === 'acquire', function ($query) {
                     $query->with(['barter_category', 'barter_provider'])
                         ->whereNot('barter_provider_id', auth()->id())
