@@ -75,12 +75,18 @@ class BarterService extends BaseModel
         'min_price',
         'max_price',
         'price_unit',
-        'rating',
         'status',
     ];
 
-    protected $appends = ['pending_count', 'completed_count', 'images'];
+    protected $appends = [
+        'rating',
+        'pending_count',
+        'completed_count',
+        'reviews_count',
+        'images',
+    ];
 
+    /* ======================================== RELATIONSHIPS */
     public function barter_provider(): BelongsTo
     {
         return $this->belongsTo(User::class, 'barter_provider_id');
@@ -106,6 +112,40 @@ class BarterService extends BaseModel
         return $this->belongsToMany(BarterInvoice::class)->using(BarterInvoiceBarterService::class);
     }
 
+    /* ======================================== SPATIE/MEDIA-LIBRARY */
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('barter_service_images')
+            ->useFallbackUrl(config('app.default.image.uri'))
+            ->useFallbackPath(public_path(config('app.default.image.uri')))
+            ->registerMediaConversions(function (Media $media) {
+                $this
+                    ->addMediaConversion('thumb')
+                    ->width(300)
+                    ->height(300);
+            });
+    }
+
+    /* ======================================== ATTRIBUTES */
+    protected function getImagesAttribute()
+    {
+        return $this->getMedia('barter_service_images')->map(function ($media) {
+            return [
+                'uri' => $media->getFullUrl(),
+                'name' => $media->file_name,
+                'type' => $media->mime_type,
+            ];
+        })->toArray();
+    }
+
+    protected function getRatingAttribute()
+    {
+        $rating = $this->barter_reviews()->avg('rating');
+
+        return $rating ? round($rating, 2) : 0;
+    }
+
     protected function getPendingCountAttribute(): int
     {
         return $this->barter_transactions()->where('status', 'pending')->count();
@@ -126,28 +166,8 @@ class BarterService extends BaseModel
         return $result;
     }
 
-    public function registerMediaCollections(): void
+    protected function getReviewsCountAttribute()
     {
-        $this
-            ->addMediaCollection('barter_service_images')
-            ->useFallbackUrl(config('app.default.image.uri'))
-            ->useFallbackPath(public_path(config('app.default.image.uri')))
-            ->registerMediaConversions(function (Media $media) {
-                $this
-                    ->addMediaConversion('thumb')
-                    ->width(300)
-                    ->height(300);
-            });
-    }
-
-    protected function getImagesAttribute()
-    {
-        return $this->getMedia('barter_service_images')->map(function ($media) {
-            return [
-                'uri' => $media->getFullUrl(),
-                'name' => $media->file_name,
-                'type' => $media->mime_type,
-            ];
-        })->toArray();
+        return $this->barter_reviews()->count();
     }
 }

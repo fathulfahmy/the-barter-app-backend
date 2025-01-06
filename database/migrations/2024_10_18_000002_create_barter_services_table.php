@@ -18,7 +18,6 @@ return new class extends Migration
             $table->decimal('min_price', 10, 2)->default('0');
             $table->decimal('max_price', 10, 2)->default('0');
             $table->string('price_unit');
-            $table->decimal('rating', 2, 1)->default('0');
             $table->enum('status', ['enabled', 'disabled'])->default('enabled');
 
             $table->unsignedBigInteger('barter_provider_id');

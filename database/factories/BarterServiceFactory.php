@@ -31,7 +31,6 @@ class BarterServiceFactory extends Factory
             'min_price' => $min_price,
             'max_price' => $max_price,
             'price_unit' => fake()->word(),
-            'rating' => fake()->randomFloat(1, 1, 5),
             'status' => fake()->randomElement($status),
         ];
     }
