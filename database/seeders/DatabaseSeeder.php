@@ -69,6 +69,18 @@ class DatabaseSeeder extends Seeder
     {
         $chat_client = new Client(config('app.stream_chat.key'), config('app.stream_chat.secret'));
 
+        $user = User::factory()->create([
+            'name' => 'Demo Admin 1',
+            'email' => 'admin1@demo.com',
+            'role' => 'admin'
+        ]);
+
+        $user = User::factory()->create([
+            'name' => 'Demo Admin 2',
+            'email' => 'admin2@demo.com',
+            'role' => 'admin'
+        ]);
+
         for ($i = 0; $i < $count; $i++) {
             if ($i === 0) {
                 $user = User::factory()->create([
@@ -108,7 +120,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->command->info("Seeded $service_per_user services per user");
 
-        User::all()->each(function (User $user) use ($service_per_user) {
+        User::where('role', 'user')->each(function (User $user) use ($service_per_user) {
             BarterService::factory($service_per_user)->create([
                 'barter_provider_id' => $user->id,
             ]);
@@ -132,7 +144,7 @@ class DatabaseSeeder extends Seeder
     protected function seedBarterTransactions(int $count): void
     {
         for ($i = 0; $i < $count; $i++) {
-            $user = User::inRandomOrder()->first();
+            $user = User::where('role', 'user')->inRandomOrder()->first();
             $barter_service = BarterService::whereNot('barter_provider_id', $user->id)
                 ->inRandomOrder()
                 ->first();

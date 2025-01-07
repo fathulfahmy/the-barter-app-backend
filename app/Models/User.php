@@ -3,6 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
+use Filament\Panel;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Auth\Passwords\CanResetPassword;
@@ -61,7 +64,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
  */
-class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
+class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, FilamentUser
 {
     use Authenticatable, Authorizable, CanResetPassword, MustVerifyEmail;
     use HasApiTokens, Notifiable, SoftDeletes;
@@ -75,6 +78,7 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -99,8 +103,6 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
             'password' => 'hashed',
         ];
     }
-
-    protected $appends = ['avatar'];
 
     public function barter_services(): HasMany
     {
@@ -127,19 +129,7 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
         return $this->hasMany(BarterReview::class, 'author_id');
     }
 
-    public function registerMediaCollections(): void
-    {
-        $this
-            ->addMediaCollection('user_avatar')->singleFile()
-            ->useFallbackUrl(config('app.default.image.uri'))
-            ->useFallbackPath(public_path(config('app.default.image.uri')))
-            ->registerMediaConversions(function (Media $media) {
-                $this
-                    ->addMediaConversion('thumb')
-                    ->width(100)
-                    ->height(100);
-            });
-    }
+    protected $appends = ['avatar'];
 
     protected function getAvatarAttribute()
     {
@@ -158,5 +148,24 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
             'name' => config('app.default.image.name'),
             'type' => config('app.default.image.type'),
         ];
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('user_avatar')->singleFile()
+            ->useFallbackUrl(config('app.default.image.uri'))
+            ->useFallbackPath(public_path(config('app.default.image.uri')))
+            ->registerMediaConversions(function (Media $media) {
+                $this
+                    ->addMediaConversion('thumb')
+                    ->width(100)
+                    ->height(100);
+            });
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->role === 'admin';
     }
 }
