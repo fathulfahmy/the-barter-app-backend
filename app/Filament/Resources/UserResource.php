@@ -16,7 +16,13 @@ use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
 {
+    protected static bool $shouldSkipAuthorization = true;
+
     protected static ?string $model = User::class;
+
+    protected static ?string $modelLabel = 'user';
+
+    protected static ?string $pluralModelLabel = 'users';
 
     protected static ?string $slug = 'users';
 
@@ -49,7 +55,8 @@ class UserResource extends Resource
                             ->dehydrated(fn ($state) => filled($state))
                             ->required(fn (string $context): bool => $context === 'create')
                             ->default(fn (?Model $record) => $record === null ? 'password' : null),
-                    ])->columnSpan(1),
+                    ])
+                    ->columnSpan(1),
             ]);
     }
 
@@ -58,7 +65,8 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')

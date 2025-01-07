@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BarterServiceStatus;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -57,6 +58,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterService whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterService withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterService withoutTrashed()
+ *
+ * @property-read mixed $reviews_count
  */
 class BarterService extends BaseModel
 {
@@ -78,13 +81,17 @@ class BarterService extends BaseModel
         'status',
     ];
 
-    protected $appends = [
-        'rating',
-        'pending_count',
-        'completed_count',
-        'reviews_count',
-        'images',
-    ];
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => BarterServiceStatus::class,
+        ];
+    }
 
     /* ======================================== RELATIONSHIPS */
     public function barter_provider(): BelongsTo
@@ -112,22 +119,15 @@ class BarterService extends BaseModel
         return $this->belongsToMany(BarterInvoice::class)->using(BarterInvoiceBarterService::class);
     }
 
-    /* ======================================== SPATIE/MEDIA-LIBRARY */
-    public function registerMediaCollections(): void
-    {
-        $this
-            ->addMediaCollection('barter_service_images')
-            ->useFallbackUrl(config('app.default.image.uri'))
-            ->useFallbackPath(public_path(config('app.default.image.uri')))
-            ->registerMediaConversions(function (Media $media) {
-                $this
-                    ->addMediaConversion('thumb')
-                    ->width(300)
-                    ->height(300);
-            });
-    }
-
     /* ======================================== ATTRIBUTES */
+    protected $appends = [
+        'rating',
+        'pending_count',
+        'completed_count',
+        'reviews_count',
+        'images',
+    ];
+
     protected function getImagesAttribute()
     {
         return $this->getMedia('barter_service_images')->map(function ($media) {
@@ -169,5 +169,20 @@ class BarterService extends BaseModel
     protected function getReviewsCountAttribute()
     {
         return $this->barter_reviews()->count();
+    }
+
+    /* ======================================== PACKAGES */
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('barter_service_images')
+            ->useFallbackUrl(config('app.default.image.uri'))
+            ->useFallbackPath(public_path(config('app.default.image.uri')))
+            ->registerMediaConversions(function (Media $media) {
+                $this
+                    ->addMediaConversion('thumb')
+                    ->width(300)
+                    ->height(300);
+            });
     }
 }
