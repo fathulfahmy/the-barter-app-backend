@@ -4,7 +4,6 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
-use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\MustVerifyEmail;
@@ -12,6 +11,7 @@ use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\Access\Authorizable;
@@ -63,6 +63,13 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
+ *
+ * @property string $role
+ * @property-read mixed $is_admin
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User isAdmin()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User isNotAdmin()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRole($value)
  */
 class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, FilamentUser
 {
@@ -104,6 +111,18 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
         ];
     }
 
+    /* ======================================== SCOPES */
+    public function scopeIsAdmin(Builder $query): void
+    {
+        $query->where('role', 'admin');
+    }
+
+    public function scopeIsNotAdmin(Builder $query): void
+    {
+        $query->whereNot('role', 'admin');
+    }
+
+    /* ======================================== RELATIONSHIPS */
     public function barter_services(): HasMany
     {
         return $this->hasMany(BarterService::class, 'barter_provider_id');
@@ -129,6 +148,7 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
         return $this->hasMany(BarterReview::class, 'author_id');
     }
 
+    /* ======================================== ATTRIBUTES */
     protected $appends = ['avatar'];
 
     protected function getAvatarAttribute()
@@ -150,6 +170,12 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
         ];
     }
 
+    protected function getIsAdminAttribute()
+    {
+        return $this->role === 'admin';
+    }
+
+    /* ======================================== PACKAGES */
     public function registerMediaCollections(): void
     {
         $this
@@ -166,6 +192,6 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->role === 'admin';
+        return $this->is_admin;
     }
 }

@@ -13,7 +13,7 @@ class StatsOverview extends BaseWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Users', User::where('role', 'user')->count()),
+            Stat::make('Users', User::isNotAdmin()->count()),
             Stat::make('Services', BarterService::count()),
             Stat::make('Transactions', BarterTransaction::count()),
         ];
