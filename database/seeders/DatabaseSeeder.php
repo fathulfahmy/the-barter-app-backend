@@ -165,9 +165,8 @@ class DatabaseSeeder extends Seeder
                     $user->barter_services->pluck('id')->random(2)
                 );
 
-                $random_id = fake()->randomElement([$barter_transaction->barter_acquirer_id, $barter_transaction->barter_provider_id]);
-
                 if ($barter_transaction->status === 'awaiting_completed') {
+                    $random_id = fake()->randomElement([$barter_transaction->barter_acquirer_id, $barter_transaction->barter_provider_id]);
                     $barter_transaction->update(['awaiting_completed_user_id' => $random_id]);
                 }
 
@@ -175,20 +174,15 @@ class DatabaseSeeder extends Seeder
                     if (rand(0, 1)) {
                         BarterReview::factory()->create([
                             'author_id' => $barter_transaction->barter_acquirer_id,
-                            'barter_service_id' => $barter_transaction->barter_service_id,
                             'barter_transaction_id' => $barter_transaction->id,
                         ]);
                     }
 
                     if (rand(0, 1)) {
-                        foreach ($barter_invoice->barter_services as $barter_service) {
-                            BarterReview::factory()->create([
-                                'author_id' => $barter_transaction->barter_provider_id,
-                                'barter_service_id' => $barter_service->id,
-                                'barter_transaction_id' => $barter_transaction->id,
-                            ]);
-                        }
-
+                        BarterReview::factory()->create([
+                            'author_id' => $barter_transaction->barter_provider_id,
+                            'barter_transaction_id' => $barter_transaction->id,
+                        ]);
                     }
                 }
             }

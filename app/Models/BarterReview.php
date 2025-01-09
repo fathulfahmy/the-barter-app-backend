@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Observers\BarterReviewObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 /**
  * @property int $id
  * @property int $author_id
@@ -38,6 +38,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview withoutTrashed()
  */
+
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+#[ObservedBy([BarterReviewObserver::class])]
 class BarterReview extends BaseModel
 {
     use SoftDeletes;
