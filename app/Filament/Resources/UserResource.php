@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class UserResource extends Resource
 {
@@ -42,15 +43,15 @@ class UserResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->required()
-                            ->maxLength(255),
+                            ->rules(['string', 'max:255']),
                         Forms\Components\TextInput::make('email')
-                            ->email()
                             ->required()
-                            ->maxLength(255),
+                            ->unique(ignoreRecord: true)
+                            ->rules(['string', 'email', 'max:255']),
                         Forms\Components\TextInput::make('password')
                             ->password()
                             ->revealable()
-                            ->maxLength(255)
+                            ->rules([Password::defaults()])
                             ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                             ->dehydrated(fn ($state) => filled($state))
                             ->required(fn (string $context): bool => $context === 'create')
@@ -65,10 +66,15 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('email')
+                    ->wrap()
+                    ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->wrap()
+                    ->sortable()
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

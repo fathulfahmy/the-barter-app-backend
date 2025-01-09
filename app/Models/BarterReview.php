@@ -59,6 +59,7 @@ class BarterReview extends BaseModel
         'rating',
     ];
 
+    /* ======================================== RELATIONSHIPS */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');

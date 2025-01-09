@@ -63,6 +63,7 @@ class BarterTransaction extends BaseModel
         'status',
     ];
 
+    /* ======================================== RELATIONSHIPS */
     public function barter_acquirer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'barter_acquirer_id');

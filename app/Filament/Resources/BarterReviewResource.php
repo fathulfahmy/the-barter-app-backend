@@ -42,14 +42,12 @@ class BarterReviewResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('rating')
                             ->required()
-                            ->integer()
-                            ->step(1)
-                            ->minValue(0)
-                            ->maxValue(5)
-                            ->default(0),
+                            ->default(0)
+                            ->rules(['integer', 'min:0', 'max:5']),
                         Forms\Components\Textarea::make('description')
                             ->autosize()
-                            ->required(),
+                            ->required()
+                            ->rules(['string', 'max:65535']),
                     ])
                     ->columnSpan(1),
                 Forms\Components\Section::make()
@@ -63,7 +61,8 @@ class BarterReviewResource extends Resource
                             )
                             ->searchable()
                             ->native(false)
-                            ->required(),
+                            ->required()
+                            ->rules(['exists:barter_transactions,id']),
                         Forms\Components\Select::make('author_id')
                             ->label('Author')
                             ->options(function (Get $get) {
@@ -89,7 +88,8 @@ class BarterReviewResource extends Resource
                                 return $options;
                             })
                             ->native(false)
-                            ->required(),
+                            ->required()
+                            ->rules(['exists:users,id']),
                     ])
                     ->columnSpan(1),
             ]);
@@ -101,22 +101,28 @@ class BarterReviewResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('barter_transaction.id')
                     ->label('Transaction ID')
-                    ->numeric()
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('author.name')
-                    ->numeric()
+                    ->wrap()
                     ->sortable()
                     ->searchable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('barter_service.title')
                     ->label('Service')
-                    ->numeric()
+                    ->wrap()
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('rating')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('description')
+                    ->wrap()
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -131,7 +137,8 @@ class BarterReviewResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\TrashedFilter::make()
+                    ->native(false),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()

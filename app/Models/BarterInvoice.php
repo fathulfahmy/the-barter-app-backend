@@ -54,6 +54,7 @@ class BarterInvoice extends BaseModel
         'amount',
     ];
 
+    /* ======================================== RELATIONSHIPS */
     protected $with = ['barter_services'];
 
     public function barter_acquirer(): BelongsTo

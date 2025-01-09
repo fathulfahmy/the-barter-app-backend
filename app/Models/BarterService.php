@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\BarterServiceStatus;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -80,18 +79,6 @@ class BarterService extends BaseModel
         'price_unit',
         'status',
     ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => BarterServiceStatus::class,
-        ];
-    }
 
     /* ======================================== RELATIONSHIPS */
     public function barter_provider(): BelongsTo
