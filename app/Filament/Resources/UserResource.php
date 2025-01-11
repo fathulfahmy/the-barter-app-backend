@@ -31,7 +31,7 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-circle';
 
-    protected static ?string $activeNavigationIcon = 'heroicon-s-user-circle';
+    protected static ?string $activeNavigationIcon = 'heroicon-m-user-circle';
 
     protected static ?int $navigationSort = 0;
 
@@ -72,9 +72,20 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->wrap()
                     ->sortable()
-                    ->sortable()
                     ->searchable()
                     ->toggleable(),
+                Tables\Columns\TextColumn::make('suspension_starts_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('suspension_ends_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('suspension_reason')
+                    ->wrap()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -97,12 +108,15 @@ class UserResource extends Resource
                     ->iconButton(),
                 Tables\Actions\EditAction::make()
                     ->iconButton(),
+                Tables\Actions\SuspendAction::make()
+                    ->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\SuspendBulkAction::make(),
                 ]),
             ]);
     }

@@ -33,7 +33,7 @@ class BarterTransactionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
-    protected static ?string $activeNavigationIcon = 'heroicon-s-currency-dollar';
+    protected static ?string $activeNavigationIcon = 'heroicon-m-currency-dollar';
 
     protected static ?int $navigationSort = 1;
 

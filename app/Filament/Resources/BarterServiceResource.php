@@ -31,7 +31,7 @@ class BarterServiceResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
-    protected static ?string $activeNavigationIcon = 'heroicon-s-briefcase';
+    protected static ?string $activeNavigationIcon = 'heroicon-m-briefcase';
 
     protected static ?int $navigationSort = 1;
 

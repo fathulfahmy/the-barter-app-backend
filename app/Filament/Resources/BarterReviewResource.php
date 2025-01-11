@@ -30,7 +30,7 @@ class BarterReviewResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-star';
 
-    protected static ?string $activeNavigationIcon = 'heroicon-s-star';
+    protected static ?string $activeNavigationIcon = 'heroicon-m-star';
 
     protected static ?int $navigationSort = 2;
 
