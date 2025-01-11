@@ -99,7 +99,7 @@ class AuthController extends BaseController
             ]);
 
         } catch (ValidationException $e) {
-            return response()->apiError('Invalid credentials', $e->getMessage());
+            return response()->apiError($e->getMessage(), $e->errors());
 
         } catch (\Exception $e) {
             DB::rollBack();

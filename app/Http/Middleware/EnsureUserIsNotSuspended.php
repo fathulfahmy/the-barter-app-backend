@@ -3,11 +3,10 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureEmailIsVerified
+class EnsureUserIsNotSuspended
 {
     /**
      * Handle an incoming request.
@@ -18,11 +17,11 @@ class EnsureEmailIsVerified
     {
         if (
             ! $request->user() ||
-            ($request->user() instanceof MustVerifyEmail &&
-                ! $request->user()->hasVerifiedEmail())
+            $request->user()->is_suspended_temporarily ||
+            $request->user()->is_suspended_permanently
         ) {
             return response()->json(
-                ['message' => 'Your email address is not verified.'],
+                ['message' => 'Your account has been suspended. Please check your email for further details.'],
                 409
             );
         }

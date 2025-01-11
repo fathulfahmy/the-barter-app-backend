@@ -54,6 +54,14 @@ class AuthLoginRequest extends BaseRequest
             ]);
         }
 
+        if (Auth::user()->is_suspended_temporarily || Auth::user()->is_suspended_permanently) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'suspended' => 'Your account has been suspended. Please check your email for further details.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

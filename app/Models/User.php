@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\Suspendable;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Auth\Authenticatable;
@@ -75,6 +76,7 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
 {
     use Authenticatable, Authorizable, CanResetPassword, MustVerifyEmail;
     use HasApiTokens, Notifiable, SoftDeletes;
+    use Notifiable, Suspendable;
 
     /**
      * The attributes that are mass assignable.
@@ -86,6 +88,9 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
         'email',
         'password',
         'role',
+        'suspension_starts_at',
+        'suspension_ends_at',
+        'suspension_reason',
     ];
 
     /**
@@ -108,6 +113,8 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'suspension_starts_at' => 'datetime',
+            'suspension_ends_at' => 'datetime',
         ];
     }
 

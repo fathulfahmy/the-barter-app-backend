@@ -19,6 +19,9 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role', ['admin', 'user'])->default('user');
             $table->rememberToken();
+            $table->dateTime('suspension_starts_at')->nullable();
+            $table->dateTime('suspension_ends_at')->nullable();
+            $table->text('suspension_reason')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
