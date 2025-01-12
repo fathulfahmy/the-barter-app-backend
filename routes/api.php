@@ -8,6 +8,8 @@ use App\Http\Controllers\BarterServiceController;
 use App\Http\Controllers\BarterTransactionController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserReportController;
+use App\Http\Controllers\UserReportReasonController;
 use App\Http\Middleware\EnsureUserIsNotSuspended;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +21,9 @@ Route::middleware(['auth:sanctum', EnsureUserIsNotSuspended::class])->group(func
     // AUTH
     Route::post('/auth/logout', [AuthController::class, 'logout'])->name('api.auth.logout');
     Route::get('/auth/me', [AuthController::class, 'me'])->name('api.auth.me');
+
+    // BARTER CATEGORIES
+    Route::get('/barter_categories', [BarterCategoryController::class, 'index'])->name('api.barter_categories.index');
 
     // BARTER SERVICES
     Route::get('/barter_services', [BarterServiceController::class, 'index'])->name('api.barter_services.index');
@@ -48,11 +53,15 @@ Route::middleware(['auth:sanctum', EnsureUserIsNotSuspended::class])->group(func
     Route::patch('/barter_reviews/{barter_review_id}', [BarterReviewController::class, 'update'])->name('api.barter_reviews.update');
     Route::delete('/barter_reviews/{barter_review_id}', [BarterReviewController::class, 'destroy'])->name('api.barter_reviews.destroy');
 
-    // BARTER CATEGORIES
-    Route::get('/barter_categories', [BarterCategoryController::class, 'index'])->name('api.barter_categories.index');
-
     // USER
     Route::patch('/users/{user_id}', [UserController::class, 'update'])->name('api.profile.update');
+
+    // USER REPORT REASON
+    Route::get('/user_report_reasons', [UserReportReasonController::class, 'index'])->name('api.user_report_reasons.index');
+
+    // USER REPORT
+    Route::get('/user_reports', [UserReportController::class, 'index'])->name('api.user_reports.index');
+    Route::post('/user_reports', [UserReportController::class, 'store'])->name('api.user_reports.store');
 
     // STRIPE
     Route::post('/stripe/payment_sheet', [StripeController::class, 'payment_sheet'])->name('api.stripe.payment_sheet');

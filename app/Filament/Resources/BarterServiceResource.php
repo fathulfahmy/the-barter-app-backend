@@ -27,13 +27,15 @@ class BarterServiceResource extends Resource
 
     protected static ?string $slug = 'services';
 
+    protected static ?string $navigationGroup = 'Barters';
+
     protected static ?string $navigationLabel = 'Services';
 
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
     protected static ?string $activeNavigationIcon = 'heroicon-m-briefcase';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 0;
 
     public static function form(Form $form): Form
     {

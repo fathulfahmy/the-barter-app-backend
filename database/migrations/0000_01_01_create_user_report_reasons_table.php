@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('barter_categories', function (Blueprint $table) {
+        Schema::create('user_report_reasons', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->timestamps();
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('barter_categories');
+        Schema::dropIfExists('user_report_reasons');
     }
 };

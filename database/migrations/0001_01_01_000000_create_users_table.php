@@ -21,7 +21,10 @@ return new class extends Migration
             $table->rememberToken();
             $table->dateTime('suspension_starts_at')->nullable();
             $table->dateTime('suspension_ends_at')->nullable();
-            $table->text('suspension_reason')->nullable();
+
+            $table->unsignedBigInteger('suspension_reason_id')->nullable();
+            $table->foreign('suspension_reason_id')->references('id')->on('user_report_reasons');
+
             $table->timestamps();
             $table->softDeletes();
         });

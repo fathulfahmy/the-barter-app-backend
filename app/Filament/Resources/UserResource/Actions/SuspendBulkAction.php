@@ -3,8 +3,10 @@
 namespace Filament\Tables\Actions;
 
 use App\Models\User as Model;
+use App\Models\UserReportReason;
 use Closure;
 use Filament\Actions\Concerns\CanCustomizeProcess;
+use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
@@ -20,7 +22,7 @@ class SuspendBulkAction extends BulkAction
 
     public static function getDefaultName(): ?string
     {
-        return 'suspend';
+        return 'suspend-bulk';
     }
 
     protected function setUp(): void
@@ -37,26 +39,9 @@ class SuspendBulkAction extends BulkAction
 
         $this->color('danger');
 
-        $this->icon('heroicon-s-hand-raised');
+        $this->icon('heroicon-m-hand-raised');
 
-        $reasons = [
-            'Violation of terms and conditions',
-            'Suspicious or fraudulent activity',
-            'Harassment or abusive behavior',
-            'Unauthorized access or hacking attempts',
-            'Spamming or phishing activities',
-            'Uploading inappropriate content',
-            'Repeated policy violations',
-            'Failure to verify account details',
-            'Payment disputes or chargebacks',
-            'Account inactivity for an extended period',
-            'Impersonation or identity theft',
-            'Use of offensive language or hate speech',
-            'Violation of community guidelines',
-            'Sharing or distributing prohibited content',
-            'Breaching data privacy rules',
-            'Misrepresentation of information',
-        ];
+        $reasons = UserReportReason::pluck('name')->toArray();
 
         $this->form([
             Radio::make('action')
@@ -67,13 +52,14 @@ class SuspendBulkAction extends BulkAction
                 ])
                 ->required()
                 ->live(),
-            Select::make('suspension_reason')
+            Select::make('suspension_reason_id')
                 ->label('Reason')
-                ->options($reasons)
+                ->options($reasons = UserReportReason::pluck('name', 'id')->toArray())
+                ->default(array_key_first($reasons))
                 ->native(false)
                 ->searchable()
                 ->required()
-                ->rules(['string', 'max:65535'])
+                ->rules(['exists:user_report_reasons,id'])
                 ->visible(
                     fn (Get $get) => $get('action') === 'suspend_temporarily' ||
                     $get('action') === 'suspend_permanently'
@@ -91,6 +77,12 @@ class SuspendBulkAction extends BulkAction
                         $set('suspension_ends_at', null);
                     }
                 })
+                ->suffixAction(
+                    FormAction::make('clear')
+                        ->color('gray')
+                        ->icon('heroicon-m-x-mark')
+                        ->action(fn (Set $set) => $set('suspension_starts_at', null))
+                )
                 ->visible(
                     fn (Get $get) => $get('action') === 'suspend_temporarily' ||
                     $get('action') === 'suspend_permanently'
@@ -104,6 +96,12 @@ class SuspendBulkAction extends BulkAction
                 ->required()
                 ->minDate(fn (Get $get) => $get('suspension_starts_at'))
                 ->after('suspension_starts_at')
+                ->suffixAction(
+                    FormAction::make('clear')
+                        ->color('gray')
+                        ->icon('heroicon-m-x-mark')
+                        ->action(fn (Set $set) => $set('suspension_ends_at', null))
+                )
                 ->visible(
                     fn (Get $get) => $get('action') === 'suspend_temporarily'
                 ),
@@ -112,7 +110,7 @@ class SuspendBulkAction extends BulkAction
         $this->fillForm(function (Model $record) use ($reasons): array {
             $data = [
                 'action' => 'suspend_temporarily',
-                'suspension_reason' => $reasons[0],
+                'suspension_reason_id' => array_key_first($reasons),
                 'suspension_starts_at' => now(),
                 'suspension_ends_at' => now()->addDays(14),
             ];
@@ -131,7 +129,7 @@ class SuspendBulkAction extends BulkAction
                 } else {
                     $records->each(function (Model $record) use ($data) {
                         $record->suspend(
-                            $data['suspension_reason'],
+                            $data['suspension_reason_id'],
                             $data['suspension_starts_at'],
                             $data['suspension_ends_at'] ?? null
                         );

@@ -34,6 +34,10 @@ class UserSuspended extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $title = '';
+        $status = '';
+        $datetime = null;
+
         if ($this->user->is_suspended_temporarily) {
             $title = 'Temporary';
             $status = 'temporarily';
@@ -48,7 +52,7 @@ class UserSuspended extends Notification
             ->subject($title.' Account Suspension - The Barter App')
             ->greeting('Dear '.$this->user->name.',')
             ->line('Your account has been '.$status.' suspended.')
-            ->line('Reason: '.$this->user->suspension_reason)
+            ->line('Reason: '.$this->user->suspension_reason->name)
             ->line($datetime)
             ->line('Please contact us if you need further assistance.')
             ->line('We thank you for your understanding.');

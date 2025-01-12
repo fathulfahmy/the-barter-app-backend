@@ -4,8 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
+use App\Models\UserReportReason;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -26,6 +29,8 @@ class UserResource extends Resource
     protected static ?string $pluralModelLabel = 'users';
 
     protected static ?string $slug = 'users';
+
+    protected static ?string $navigationGroup = 'General';
 
     protected static ?string $navigationLabel = 'Users';
 
@@ -58,6 +63,50 @@ class UserResource extends Resource
                             ->default(fn (?Model $record) => $record === null ? 'password' : null),
                     ])
                     ->columnSpan(1),
+                Forms\Components\Section::make('Suspend')
+                    ->schema([
+                        Forms\Components\Select::make('suspension_reason_id')
+                            ->label('Reason')
+                            ->options($reasons = UserReportReason::pluck('name', 'id')->toArray())
+                            ->searchable()
+                            ->requiredWith('suspension_starts_at')
+                            ->rules(['exists:user_report_reasons,id']),
+                        Forms\Components\DateTimePicker::make('suspension_starts_at')
+                            ->hiddenLabel()
+                            ->prefix('Starts')
+                            ->timezone('Asia/Kuala_Lumpur')
+                            ->seconds(false)
+                            ->native(false)
+                            ->live()
+                            ->requiredWith('suspension_reason_id')
+                            ->suffixAction(
+                                Forms\Components\Actions\Action::make('clear')
+                                    ->color('gray')
+                                    ->icon('heroicon-m-x-mark')
+                                    ->action(fn (Set $set) => $set('suspension_starts_at', null))
+                            )
+                            ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                if ($state > $get('suspension_ends_at')) {
+                                    $set('suspension_ends_at', null);
+                                }
+                            }),
+                        Forms\Components\DateTimePicker::make('suspension_ends_at')
+                            ->hiddenLabel()
+                            ->prefix('Ends')
+                            ->timezone('Asia/Kuala_Lumpur')
+                            ->seconds(false)
+                            ->native(false)
+                            ->suffixAction(
+                                Forms\Components\Actions\Action::make('clear')
+                                    ->color('gray')
+                                    ->icon('heroicon-m-x-mark')
+                                    ->action(fn (Set $set) => $set('suspension_ends_at', null))
+                            )
+                            ->minDate(fn (Get $get) => $get('suspension_starts_at'))
+                            ->after('suspension_starts_at')
+                            ->prohibitedUnless('suspension_starts_at', fn ($state) => $state !== null),
+                    ])
+                    ->columnSpan(1),
             ]);
     }
 
@@ -75,14 +124,17 @@ class UserResource extends Resource
                     ->searchable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('suspension_starts_at')
+                    ->label('Suspension starts')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('suspension_ends_at')
+                    ->label('Suspension ends')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('suspension_reason')
+                Tables\Columns\TextColumn::make('suspension_reason.name')
+                    ->label('Suspension reason')
                     ->wrap()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -113,10 +165,10 @@ class UserResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\SuspendBulkAction::make(),
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
-                    Tables\Actions\SuspendBulkAction::make(),
                 ]),
             ]);
     }

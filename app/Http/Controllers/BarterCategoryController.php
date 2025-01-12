@@ -6,7 +6,7 @@ use App\Models\BarterCategory;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @tags Category
+ * @tags Service
  */
 class BarterCategoryController extends BaseController
 {

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
@@ -22,9 +23,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory whereUpdatedAt($value)
+ *
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory withoutTrashed()
  */
 class BarterCategory extends BaseModel
 {
+    use SoftDeletes;
+
     /**
      * The attributes that are mass assignable.
      *

@@ -8,6 +8,8 @@ use App\Models\BarterReview;
 use App\Models\BarterService;
 use App\Models\BarterTransaction;
 use App\Models\User;
+use App\Models\UserReport;
+use App\Models\UserReportReason;
 use GetStream\StreamChat\Client;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
@@ -26,6 +28,8 @@ class DatabaseSeeder extends Seeder
         $this->seedBarterServices(5);
         $this->seedBarterServiceImages(5);
         $this->seedBarterTransactions(count: 1000);
+        $this->seedUserReportReasons(10);
+        $this->seedUserReports(10);
     }
 
     protected function clearMedia()
@@ -189,5 +193,23 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->command->info("Seeded $count transactions");
+    }
+
+    protected function seedUserReportReasons(int $count): void
+    {
+        UserReportReason::factory($count)->create();
+
+        $this->command->info("Seeded $count reasons");
+    }
+
+    protected function seedUserReports(int $count_per_user)
+    {
+        User::isNotAdmin()->each(function (User $user) use ($count_per_user) {
+            UserReport::factory($count_per_user)->create([
+                'author_id' => $user->id,
+            ]);
+        });
+
+        $this->command->info("Seeded $count_per_user reports per user");
     }
 }

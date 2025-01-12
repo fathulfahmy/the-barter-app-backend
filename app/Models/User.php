@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Observers\UserObserver;
 use App\Traits\Suspendable;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -12,7 +13,9 @@ use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\Access\Authorizable;
@@ -71,7 +74,21 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User isAdmin()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User isNotAdmin()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRole($value)
+ *
+ * @property \Illuminate\Support\Carbon|null $suspension_starts_at
+ * @property \Illuminate\Support\Carbon|null $suspension_ends_at
+ * @property int|null $suspension_reason_id
+ * @property-read mixed $is_suspended_permanently
+ * @property-read mixed $is_suspended_temporarily
+ * @property-read \App\Models\UserReportReason|null $suspension_reason
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UserReport> $user_reports
+ * @property-read int|null $user_reports_count
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereSuspensionEndsAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereSuspensionReasonId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereSuspensionStartsAt($value)
  */
+#[ObservedBy([UserObserver::class])]
 class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, FilamentUser
 {
     use Authenticatable, Authorizable, CanResetPassword, MustVerifyEmail;
@@ -90,7 +107,7 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
         'role',
         'suspension_starts_at',
         'suspension_ends_at',
-        'suspension_reason',
+        'suspension_reason_id',
     ];
 
     /**
@@ -119,6 +136,10 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
     }
 
     /* ======================================== SCOPES */
+    protected $with = [
+        'suspension_reason:id,name',
+    ];
+
     public function scopeIsAdmin(Builder $query): void
     {
         $query->where('role', 'admin');
@@ -153,6 +174,16 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
     public function barter_reviews(): HasMany
     {
         return $this->hasMany(BarterReview::class, 'author_id');
+    }
+
+    public function user_reports(): HasMany
+    {
+        return $this->hasMany(UserReport::class, 'author_id');
+    }
+
+    public function suspension_reason(): BelongsTo
+    {
+        return $this->belongsTo(UserReportReason::class, 'suspension_reason_id');
     }
 
     /* ======================================== ATTRIBUTES */

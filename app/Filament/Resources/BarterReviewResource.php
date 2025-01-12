@@ -26,6 +26,8 @@ class BarterReviewResource extends Resource
 
     protected static ?string $slug = 'reviews';
 
+    protected static ?string $navigationGroup = 'Barters';
+
     protected static ?string $navigationLabel = 'Reviews';
 
     protected static ?string $navigationIcon = 'heroicon-o-star';

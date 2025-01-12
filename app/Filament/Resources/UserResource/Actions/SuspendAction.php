@@ -3,8 +3,10 @@
 namespace Filament\Tables\Actions;
 
 use App\Models\User as Model;
+use App\Models\UserReportReason;
 use Closure;
 use Filament\Actions\Concerns\CanCustomizeProcess;
+use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
@@ -36,26 +38,7 @@ class SuspendAction extends Action
 
         $this->color('danger');
 
-        $this->icon('heroicon-s-hand-raised');
-
-        $reasons = [
-            'Violation of terms and conditions',
-            'Suspicious or fraudulent activity',
-            'Harassment or abusive behavior',
-            'Unauthorized access or hacking attempts',
-            'Spamming or phishing activities',
-            'Uploading inappropriate content',
-            'Repeated policy violations',
-            'Failure to verify account details',
-            'Payment disputes or chargebacks',
-            'Account inactivity for an extended period',
-            'Impersonation or identity theft',
-            'Use of offensive language or hate speech',
-            'Violation of community guidelines',
-            'Sharing or distributing prohibited content',
-            'Breaching data privacy rules',
-            'Misrepresentation of information',
-        ];
+        $this->icon('heroicon-m-hand-raised');
 
         $this->form([
             Radio::make('action')
@@ -66,13 +49,14 @@ class SuspendAction extends Action
                 ])
                 ->required()
                 ->live(),
-            Select::make('suspension_reason')
+            Select::make('suspension_reason_id')
                 ->label('Reason')
-                ->options($reasons)
+                ->options($reasons = UserReportReason::pluck('name', 'id')->toArray())
+                ->default(array_key_first($reasons))
                 ->native(false)
                 ->searchable()
                 ->required()
-                ->rules(['string', 'max:65535'])
+                ->rules(['exists:user_report_reasons,id'])
                 ->visible(
                     fn (Get $get) => $get('action') === 'suspend_temporarily' ||
                     $get('action') === 'suspend_permanently'
@@ -90,6 +74,12 @@ class SuspendAction extends Action
                         $set('suspension_ends_at', null);
                     }
                 })
+                ->suffixAction(
+                    FormAction::make('clear')
+                        ->color('gray')
+                        ->icon('heroicon-m-x-mark')
+                        ->action(fn (Set $set) => $set('suspension_starts_at', null))
+                )
                 ->visible(
                     fn (Get $get) => $get('action') === 'suspend_temporarily' ||
                     $get('action') === 'suspend_permanently'
@@ -103,6 +93,12 @@ class SuspendAction extends Action
                 ->required()
                 ->minDate(fn (Get $get) => $get('suspension_starts_at'))
                 ->after('suspension_starts_at')
+                ->suffixAction(
+                    FormAction::make('clear')
+                        ->color('gray')
+                        ->icon('heroicon-m-x-mark')
+                        ->action(fn (Set $set) => $set('suspension_ends_at', null))
+                )
                 ->visible(
                     fn (Get $get) => $get('action') === 'suspend_temporarily'
                 ),
@@ -113,7 +109,7 @@ class SuspendAction extends Action
                 'action' => $record->is_suspended_temporarily || $record->is_suspended_permanently
                     ? 'unsuspend'
                     : 'suspend_temporarily',
-                'suspension_reason' => $record->suspension_reason ?? $reasons[0],
+                'suspension_reason_id' => $record->suspension_reason_id ?? array_key_first($reasons),
                 'suspension_starts_at' => $record->suspension_starts_at ?? now(),
                 'suspension_ends_at' => $record->suspension_ends_at ?? now()->addDays(14),
             ];
@@ -127,7 +123,7 @@ class SuspendAction extends Action
                     $record->unsuspend();
                 } else {
                     $record->suspend(
-                        $data['suspension_reason'],
+                        $data['suspension_reason_id'],
                         $data['suspension_starts_at'],
                         $data['suspension_ends_at'] ?? null
                     );

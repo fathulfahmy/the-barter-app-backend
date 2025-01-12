@@ -27,6 +27,8 @@ class BarterTransactionResource extends Resource
 
     protected static ?string $pluralModelLabel = 'transactions';
 
+    protected static ?string $navigationGroup = 'Barters';
+
     protected static ?string $slug = 'transactions';
 
     protected static ?string $navigationLabel = 'Transactions';

@@ -47,13 +47,13 @@ class BarterServiceController extends BaseController
                     $query->whereIn('barter_category_id', $categories);
                 })
                 ->when($mode === 'acquire', function ($query) {
-                    $query->with(['barter_category', 'barter_provider'])
+                    $query->with(['barter_provider'])
                         ->whereNot('barter_provider_id', auth()->id())
                         ->where('status', 'enabled')
                         ->inRandomOrder();
                 })
                 ->when($mode === 'provide', function ($query) {
-                    $query->with('barter_category')
+                    $query
                         ->where('barter_provider_id', auth()->id())
                         ->orderBy('title');
                 });
@@ -80,7 +80,6 @@ class BarterServiceController extends BaseController
     {
         try {
             $barter_service = BarterService::with([
-                'barter_category',
                 'barter_provider',
             ])
                 ->findOrFail($barter_service_id);

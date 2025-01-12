@@ -80,6 +80,8 @@ class BarterService extends BaseModel
         'status',
     ];
 
+    protected $with = ['barter_category:id,name'];
+
     /* ======================================== RELATIONSHIPS */
     public function barter_provider(): BelongsTo
     {

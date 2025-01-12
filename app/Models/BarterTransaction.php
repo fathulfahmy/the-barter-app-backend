@@ -45,6 +45,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $awaiting_completed_user
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction whereAwaitingCompletedUserId($value)
+ *
+ * @property-read mixed $other_user
  */
 class BarterTransaction extends BaseModel
 {
@@ -62,6 +64,18 @@ class BarterTransaction extends BaseModel
         'barter_service_id',
         'status',
     ];
+
+    /* ======================================== ATTRIBUTES */
+    protected $appends = [
+        'other_user',
+    ];
+
+    public function getOtherUserAttribute()
+    {
+        $other_user_id = auth()->id() === $this->barter_provider_id ? $this->barter_acquirer_id : $this->barter_provider_id;
+
+        return User::where('id', $other_user_id)->first();
+    }
 
     /* ======================================== RELATIONSHIPS */
     public function barter_acquirer(): BelongsTo

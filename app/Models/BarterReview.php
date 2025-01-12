@@ -38,7 +38,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview withoutTrashed()
  */
-
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ObservedBy([BarterReviewObserver::class])]

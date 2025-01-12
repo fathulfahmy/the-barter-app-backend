@@ -2,9 +2,6 @@
 
 namespace App\Traits;
 
-use App\Notifications\UserSuspended;
-use App\Notifications\UserUnsuspended;
-use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
@@ -26,37 +23,20 @@ trait Suspendable
     protected function isSuspendedTemporarily(): Attribute
     {
         return Attribute::get(
-            fn () => $this->suspension_starts_at && $this->suspension_ends_at?->isFuture()
+            fn () => $this->suspension_starts_at && $this->suspension_ends_at
         );
     }
 
     /**
      * Suspend user account and send notification
      */
-    public function suspend(string $suspension_reason, string|CarbonInterface|null $suspension_starts_at = null, string|CarbonInterface|null $suspension_ends_at = null): void
+    public function suspend(int $suspension_reason_id, string|CarbonInterface|null $suspension_starts_at = null, string|CarbonInterface|null $suspension_ends_at = null): void
     {
-        $suspension_starts_at = $suspension_starts_at instanceof CarbonInterface
-            ? $suspension_starts_at
-            : ($suspension_starts_at ? Carbon::parse($suspension_starts_at) : now());
-
-        $suspension_ends_at = $suspension_ends_at instanceof CarbonInterface
-            ? $suspension_ends_at
-            : ($suspension_ends_at ? Carbon::parse($suspension_ends_at) : null);
-
-        if (
-            $this->suspension_starts_at == $suspension_starts_at &&
-            $this->suspension_ends_at == $suspension_ends_at
-        ) {
-            return;
-        }
-
         $this->update([
-            'suspension_starts_at' => $suspension_starts_at,
+            'suspension_starts_at' => $suspension_starts_at ?? now(),
             'suspension_ends_at' => $suspension_ends_at,
-            'suspension_reason' => $suspension_reason,
+            'suspension_reason_id' => $suspension_reason_id,
         ]);
-
-        $this->notify(new UserSuspended($this));
     }
 
     /**
@@ -64,16 +44,10 @@ trait Suspendable
      */
     public function unsuspend(): void
     {
-        if (! $this->suspension_starts_at) {
-            return;
-        }
-
         $this->update([
             'suspension_starts_at' => null,
             'suspension_ends_at' => null,
-            'suspension_reason' => null,
+            'suspension_reason_id' => null,
         ]);
-
-        $this->notify(new UserUnsuspended($this));
     }
 }
