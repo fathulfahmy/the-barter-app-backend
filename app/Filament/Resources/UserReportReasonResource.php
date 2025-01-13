@@ -9,12 +9,14 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserReportReasonResource extends Resource
 {
-    protected static ?string $model = UserReportReason::class;
-
     protected static bool $shouldSkipAuthorization = true;
+
+    protected static ?string $model = UserReportReason::class;
 
     protected static ?string $modelLabel = 'reason';
 
@@ -59,6 +61,10 @@ class UserReportReasonResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('deleted_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make()
@@ -89,5 +95,13 @@ class UserReportReasonResource extends Resource
         return [
             'index' => Pages\ListUserReportReasons::route('/'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 }

@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\BarterCategoryResource\Pages;
-use App\Models\BarterCategory;
-use Filament\Forms;
+use App\Filament\Resources\AdminUserResource\Pages;
+use App\Models\User;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -12,37 +11,34 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class BarterCategoryResource extends Resource
+class AdminUserResource extends Resource
 {
-    protected static ?string $model = BarterCategory::class;
-
     protected static bool $shouldSkipAuthorization = true;
 
-    protected static ?string $modelLabel = 'category';
+    protected static ?string $model = User::class;
 
-    protected static ?string $pluralModelLabel = 'categories';
+    protected static ?string $modelLabel = 'admin';
 
-    protected static ?string $slug = 'categories';
+    protected static ?string $pluralModelLabel = 'admins';
 
-    protected static ?string $navigationGroup = 'Barters';
+    protected static ?string $slug = 'admin_users';
 
-    protected static ?string $navigationLabel = 'Categories';
+    protected static ?string $navigationGroup = 'General';
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static ?string $navigationLabel = 'Admins';
 
-    protected static ?string $activeNavigationIcon = 'heroicon-m-tag';
+    protected static ?string $navigationIcon = 'heroicon-o-user-circle';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?string $activeNavigationIcon = 'heroicon-m-user-circle';
+
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->rules(['string', 'max:255']),
-            ])
-            ->columns(1);
+                //
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -51,8 +47,13 @@ class BarterCategoryResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->wrap()
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->wrap()
+                    ->sortable()
                     ->searchable()
-                    ->sortable(),
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -67,19 +68,13 @@ class BarterCategoryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make()
-                    ->native(false),
+                //
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->iconButton(),
+                //
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
-                ]),
+                //
             ]);
     }
 
@@ -93,7 +88,7 @@ class BarterCategoryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListBarterCategories::route('/'),
+            'index' => Pages\ListAdminUsers::route('/'),
         ];
     }
 
@@ -102,6 +97,7 @@ class BarterCategoryResource extends Resource
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
-            ]);
+            ])
+            ->isAdmin();
     }
 }
