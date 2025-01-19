@@ -16,6 +16,8 @@ class UserReportFactory extends Factory
      */
     public function definition(): array
     {
+        $date = fake()->dateTimeThisMonth();
+
         $models = [
             'user',
             'barter_service',
@@ -32,6 +34,8 @@ class UserReportFactory extends Factory
             'model_id' => fake()->numberBetween(1, 10),
             'model_name' => fake()->randomElement($models),
             'status' => fake()->randomElement($status),
+            'created_at' => $date,
+            'updated_at' => $date,
         ];
     }
 }

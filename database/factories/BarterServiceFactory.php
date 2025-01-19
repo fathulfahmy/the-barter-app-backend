@@ -16,6 +16,8 @@ class BarterServiceFactory extends Factory
      */
     public function definition(): array
     {
+        $date = fake()->dateTimeThisMonth();
+
         $min_price = fake()->randomFloat(2, 0, 99);
         $max_price = fake()->randomFloat(2, $min_price, 99);
         $status = [
@@ -32,6 +34,8 @@ class BarterServiceFactory extends Factory
             'max_price' => $max_price,
             'price_unit' => fake()->word(),
             'status' => fake()->randomElement($status),
+            'created_at' => $date,
+            'updated_at' => $date,
         ];
     }
 }

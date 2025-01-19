@@ -16,8 +16,12 @@ class UserReportReasonFactory extends Factory
      */
     public function definition(): array
     {
+        $date = now()->startOfYear();
+
         return [
             'name' => fake()->sentence(),
+            'created_at' => $date,
+            'updated_at' => $date,
         ];
     }
 }

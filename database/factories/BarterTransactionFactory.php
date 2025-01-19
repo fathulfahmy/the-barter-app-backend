@@ -16,6 +16,8 @@ class BarterTransactionFactory extends Factory
      */
     public function definition(): array
     {
+        $date = fake()->dateTimeThisMonth();
+
         $status = [
             'pending',
             'accepted',
@@ -30,6 +32,8 @@ class BarterTransactionFactory extends Factory
             'barter_provider_id' => fake()->numberBetween(1, 10),
             'barter_service_id' => fake()->numberBetween(1, 50),
             'status' => fake()->randomElement($status),
+            'created_at' => $date,
+            'updated_at' => $date,
         ];
     }
 }

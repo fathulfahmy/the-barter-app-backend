@@ -6,6 +6,7 @@ use App\Http\Controllers\BarterInvoiceController;
 use App\Http\Controllers\BarterReviewController;
 use App\Http\Controllers\BarterServiceController;
 use App\Http\Controllers\BarterTransactionController;
+use App\Http\Controllers\StatsController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserReportController;
@@ -65,4 +66,8 @@ Route::middleware(['auth:sanctum', EnsureUserIsNotSuspended::class])->group(func
 
     // STRIPE
     Route::post('/stripe/payment_sheet', [StripeController::class, 'payment_sheet'])->name('api.stripe.payment_sheet');
+
+    // STATS
+    Route::get('/stats/barter_transactions/monthly_group_by_status', [StatsController::class, 'barter_transactions_monthly_group_by_status'])->name('api.stats.barter_transactions.monthly_group_by_status');
+    Route::get('/stats/barter_services/monthly_trending', [StatsController::class, 'barter_services_monthly_trending'])->name('api.stats.barter_services.monthly_trending');
 });
