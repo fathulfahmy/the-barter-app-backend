@@ -24,11 +24,11 @@ class DatabaseSeeder extends Seeder
         $this->clearMedia();
         $this->clearChat();
         $this->seedUsers(10);
-        $this->seedBarterCategories(10);
+        $this->seedBarterCategories();
         $this->seedBarterServices(5);
         $this->seedBarterServiceImages(5);
         $this->seedBarterTransactions(count: 1000);
-        $this->seedUserReportReasons(10);
+        $this->seedUserReportReasons();
         $this->seedUserReports(10);
     }
 
@@ -113,22 +113,39 @@ class DatabaseSeeder extends Seeder
         $this->command->info("Seeded $count users");
     }
 
-    protected function seedBarterCategories(int $count): void
+    protected function seedBarterCategories(): void
     {
-        BarterCategory::factory($count)->create();
+        $categories = [
+            'Home Cleaning',
+            'Plumbing Services',
+            'Electrical Repairs',
+            'Gardening & Landscaping',
+            'Personal Training',
+            'Graphic Design',
+            'Web Development',
+            'Tutoring Services',
+            'Pet Care',
+            'Photography',
+        ];
 
-        $this->command->info("Seeded $count categories");
+        foreach ($categories as $category) {
+            BarterCategory::factory()->create([
+                'name' => $category,
+            ]);
+        }
+
+        $this->command->info("Seeded categories");
     }
 
     protected function seedBarterServices(int $service_per_user): void
     {
-        $this->command->info("Seeded $service_per_user services per user");
-
         User::isNotAdmin()->each(function (User $user) use ($service_per_user) {
             BarterService::factory($service_per_user)->create([
                 'barter_provider_id' => $user->id,
             ]);
         });
+
+        $this->command->info("Seeded $service_per_user services per user");
     }
 
     protected function seedBarterServiceImages(int $image_per_service)
@@ -195,11 +212,28 @@ class DatabaseSeeder extends Seeder
         $this->command->info("Seeded $count transactions");
     }
 
-    protected function seedUserReportReasons(int $count): void
+    protected function seedUserReportReasons(): void
     {
-        UserReportReason::factory($count)->create();
+        $reasons = [
+            'Inappropriate content or behavior',
+            'Fraudulent or scam activity',
+            'Harassment or abusive language',
+            'Violation of terms and conditions',
+            'False information or misleading content',
+            'Spam or irrelevant content',
+            'Unauthorized transaction or payment issues',
+            'Intellectual property infringement',
+            'Privacy violation or data misuse',
+            'Impersonation or identity theft',
+        ];
 
-        $this->command->info("Seeded $count reasons");
+        foreach ($reasons as $reason) {
+            UserReportReason::factory()->create([
+                'name' => $reason,
+            ]);
+        }
+
+        $this->command->info("Seeded reasons");
     }
 
     protected function seedUserReports(int $count_per_user)
