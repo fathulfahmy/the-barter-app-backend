@@ -123,7 +123,13 @@ class BarterServiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('updated_at', 'desc')
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('title')
                     ->wrap()
                     ->sortable()
@@ -175,6 +181,10 @@ class BarterServiceResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\Filter::make('enabled')
+                    ->query(fn (Builder $query): Builder => $query->orWhere('status', 'enabled')),
+                Tables\Filters\Filter::make('disabled')
+                    ->query(fn (Builder $query): Builder => $query->orWhere('status', 'disabled')),
                 Tables\Filters\TrashedFilter::make()
                     ->native(false),
             ])

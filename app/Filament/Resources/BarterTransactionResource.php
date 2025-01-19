@@ -197,6 +197,7 @@ class BarterTransactionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('updated_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -266,6 +267,18 @@ class BarterTransactionResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\Filter::make('pending')
+                    ->query(fn (Builder $query): Builder => $query->orWhere('status', 'pending')),
+                Tables\Filters\Filter::make('cancelled')
+                    ->query(fn (Builder $query): Builder => $query->orWhere('status', 'cancelled')),
+                Tables\Filters\Filter::make('accepted')
+                    ->query(fn (Builder $query): Builder => $query->orWhere('status', 'accepted')),
+                Tables\Filters\Filter::make('rejected')
+                    ->query(fn (Builder $query): Builder => $query->orWhere('status', 'rejected')),
+                Tables\Filters\Filter::make('awaiting_completed')
+                    ->query(fn (Builder $query): Builder => $query->orWhere('status', 'awaiting_completed')),
+                Tables\Filters\Filter::make('completed')
+                    ->query(fn (Builder $query): Builder => $query->orWhere('status', 'completed')),
                 Tables\Filters\TrashedFilter::make()
                     ->native(false),
             ])

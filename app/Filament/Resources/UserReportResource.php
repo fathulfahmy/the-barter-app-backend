@@ -98,7 +98,13 @@ class UserReportResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('updated_at', 'desc')
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('model_id')
                     ->label('Model ID')
                     ->numeric()
@@ -144,6 +150,10 @@ class UserReportResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\Filter::make('unread')
+                    ->query(fn (Builder $query): Builder => $query->orWhere('status', 'unread')),
+                Tables\Filters\Filter::make('read')
+                    ->query(fn (Builder $query): Builder => $query->orWhere('status', 'read')),
                 Tables\Filters\TrashedFilter::make()
                     ->native(false),
             ])

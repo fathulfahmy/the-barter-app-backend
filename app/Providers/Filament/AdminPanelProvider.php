@@ -52,7 +52,6 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->spa()
             ->databaseTransactions()
             ->defaultThemeMode(ThemeMode::Light)
             ->brandName('The Barter App')

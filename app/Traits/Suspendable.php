@@ -27,6 +27,16 @@ trait Suspendable
         );
     }
 
+    public function scopeIsSuspendedPermanently(): void
+    {
+        $this->is_suspended_permanently;
+    }
+
+    public function scopeIsSuspendedTemporarily(): void
+    {
+        $this->is_suspended_temporarily;
+    }
+
     /**
      * Suspend user account and send notification
      */
