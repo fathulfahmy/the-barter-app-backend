@@ -33,10 +33,6 @@ class BarterTransactionController extends BaseController
             $mode = $request->input('mode');
             $barter_service_id = $request->input('barter_service_id');
 
-            if (! in_array($mode, ['incoming', 'outgoing', 'ongoing', 'history'])) {
-                throw new \Exception('Invalid transaction mode', Response::HTTP_BAD_REQUEST);
-            }
-
             $query = BarterTransaction::query()
                 ->with(['barter_acquirer', 'barter_provider', 'barter_service', 'barter_invoice'])
                 ->when($barter_service_id, function ($query) use ($barter_service_id) {
@@ -134,7 +130,7 @@ class BarterTransactionController extends BaseController
                 'amount' => $validated['amount'] ?? 0,
             ]);
 
-            if (! empty($validated['barter_service_ids'])) {
+            if (!empty($validated['barter_service_ids'])) {
                 $barter_invoice->barter_services()->attach($validated['barter_service_ids']);
             }
 

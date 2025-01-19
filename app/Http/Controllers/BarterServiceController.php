@@ -33,17 +33,23 @@ class BarterServiceController extends BaseController
             $search = $request->input('search');
             $categories = $request->input('categories', []);
 
-            if (! in_array($mode, ['acquire', 'provide'])) {
-                throw new \Exception('Invalid service mode', Response::HTTP_BAD_REQUEST);
-            }
-
             $query = BarterService::query()
-                ->when(! empty($search), function ($query) use ($search) {
+                ->when(!empty($search), function ($query) use ($search) {
                     $query->where(function ($query) use ($search) {
-                        $query->where('title', 'like', "%{$search}%");
+                        $query->where('title', 'like', "%{$search}%")
+                            ->orWhere('description', 'like', "%{$search}%")
+                            ->orWhere('min_price', 'like', "%{$search}%")
+                            ->orWhere('max_price', 'like', "%{$search}%")
+                            ->orWhere('price_unit', 'like', "%{$search}%")
+                            ->orWhereHas('barter_provider', function ($query) use ($search) {
+                                $query->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('barter_category', function ($query) use ($search) {
+                                $query->where('name', 'like', "%{$search}%");
+                            });
                     });
                 })
-                ->when(! empty($categories), function ($query) use ($categories) {
+                ->when(!empty($categories), function ($query) use ($categories) {
                     $query->whereIn('barter_category_id', $categories);
                 })
                 ->when($mode === 'acquire', function ($query) {
