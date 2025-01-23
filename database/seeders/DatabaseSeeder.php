@@ -201,9 +201,9 @@ class DatabaseSeeder extends Seeder
                     'barter_transaction_id' => $barter_transaction->id,
                 ]);
 
-                if ($user->barter_services->isNotEmpty()) {
+                if (rand(0, 1) && $user->barter_services->isNotEmpty()) {
                     $barter_invoice->barter_services()->attach(
-                        $user->barter_services->pluck('id')->random(rand(1, $user->barter_services->count()))
+                        $user->barter_services->pluck('id')->random(rand(1, floor($user->barter_services->count() / 2)))
                     );
                 }
 
@@ -246,10 +246,11 @@ class DatabaseSeeder extends Seeder
 
     protected function seedUserReports(int $count_per_user)
     {
-        $user_report_reason = UserReportReason::inRandomOrder()->first();
-        $user_report_reason_id = $user_report_reason->id;
+        $user_report_reason = UserReportReason::all();
 
-        User::isNotAdmin()->each(function (User $user) use ($count_per_user, $user_report_reason_id) {
+        User::isNotAdmin()->each(function (User $user) use ($count_per_user, $user_report_reason) {
+            $user_report_reason_id = $user_report_reason->random();
+
             UserReport::factory($count_per_user)->create([
                 'author_id' => $user->id,
                 'user_report_reason_id' => $user_report_reason_id,
