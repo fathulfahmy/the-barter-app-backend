@@ -8,6 +8,7 @@
         "php": "^8.2",
         "dedoc/scramble": "^0.11.28",
         "filament/filament": "^3.2",
+        "filament/spatie-laravel-media-library-plugin": "^3.2",
         "get-stream/stream-chat": "^3.6",
         "laravel/framework": "^11.9",
         "laravel/sanctum": "^4.0",

@@ -23,11 +23,18 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $name = fake()->name();
+        $exploded = explode(' ', trim($name));
+        $cleaned = array_map(function ($part) {
+            return preg_replace('/[^a-zA-Z0-9]/', '', $part);
+        }, $exploded);
+        $imploded = implode('.', $cleaned);
+        $email = strtolower($imploded).'@demo.com';
         $date = fake()->dateTimeThisMonth();
 
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => $name,
+            'email' => $email,
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),

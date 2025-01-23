@@ -23,20 +23,12 @@ class StatsController extends Controller
             $end_date = now();
 
             $transactions = BarterTransaction::query()
-                ->select(['created_at', 'status'])
                 ->where(function ($query) {
-                    $authId = auth()->id();
-                    $query->where('barter_provider_id', $authId)
-                        ->orWhere('barter_acquirer_id', $authId);
+                    $query->where('barter_provider_id', auth()->id())
+                        ->orWhere('barter_acquirer_id', auth()->id());
                 })
-                ->whereBetween('created_at', [$start_date, $end_date])
-                ->get()
-                ->groupBy(function ($item) {
-                    return $item->created_at->toDateString();
-                })
-                ->map(function ($group) {
-                    return $group->groupBy('status')->map->count();
-                });
+                ->whereBetween('updated_at', [$start_date, $end_date])
+                ->get();
 
             $dates = collect(range($start_date->day, $end_date->day))
                 ->map(function ($day) use ($start_date) {
@@ -50,20 +42,25 @@ class StatsController extends Controller
 
             $stats = [
                 $dates->map(function ($date) use ($transactions) {
-                    $accepted = $transactions[$date['date']]['accepted'] ?? 0;
-                    $awaiting = $transactions[$date['date']]['awaiting_completed'] ?? 0;
+                    $count = $transactions
+                        ->where('updated_at', '<=', $date['date'])
+                        ->whereIn('status', ['accepted', 'awaiting_completed'])
+                        ->count();
 
                     return [
-                        'value' => $accepted + $awaiting,
+                        'value' => $count,
                         'label' => $date['label'],
                     ];
                 })->values()->toArray(),
 
                 $dates->map(function ($date) use ($transactions) {
-                    $completed = $transactions[$date['date']]['completed'] ?? 0;
+                    $count = $transactions
+                        ->where('updated_at', '<=', $date['date'])
+                        ->whereIn('status', ['completed'])
+                        ->count();
 
                     return [
-                        'value' => $completed,
+                        'value' => $count,
                         'label' => $date['label'],
                     ];
                 })->values()->toArray(),
@@ -87,14 +84,17 @@ class StatsController extends Controller
      */
     public function barter_services_monthly_trending()
     {
+        $start_date = now()->startOfMonth();
+        $end_date = now();
+
         try {
             $stats = BarterService::query()
                 ->select(['id', 'title'])
                 ->where('barter_provider_id', auth()->id())
                 ->withCount([
                     'barter_transactions as barter_transactions_count',
-                    'barter_invoices as barter_invoices_count' => function ($query) {
-                        $query->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
+                    'barter_invoices as barter_invoices_count' => function ($query) use ($start_date, $end_date) {
+                        $query->whereBetween('created_at', [$start_date, $end_date]);
                     },
                 ])
                 ->take(5)

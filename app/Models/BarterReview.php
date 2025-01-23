@@ -37,6 +37,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview withoutTrashed()
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
  */
 use Illuminate\Database\Eloquent\SoftDeletes;
 

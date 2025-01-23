@@ -59,6 +59,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterService withoutTrashed()
  *
  * @property-read mixed $reviews_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
  */
 class BarterService extends BaseModel
 {
@@ -166,7 +168,7 @@ class BarterService extends BaseModel
         $this
             ->addMediaCollection('barter_service_images')
             ->useFallbackUrl(config('app.default.image.uri'))
-            ->useFallbackPath(public_path(config('app.default.image.uri')))
+            ->useFallbackPath(config('app.default.image.path'))
             ->registerMediaConversions(function (Media $media) {
                 $this
                     ->addMediaConversion('thumb')

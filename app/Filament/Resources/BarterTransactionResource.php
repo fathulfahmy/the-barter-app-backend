@@ -122,11 +122,11 @@ class BarterTransactionResource extends Resource
                                     ->live()
                                     ->afterStateUpdated(function (Set $set, $state) {
                                         if ($state !== 'awaiting_completed') {
-                                            $set('awaiting_completed_user_id', null);
+                                            $set('awaiting_user_id', null);
                                         }
                                     })
                                     ->required(),
-                                Forms\Components\Select::make('awaiting_completed_user_id')
+                                Forms\Components\Select::make('awaiting_user_id')
                                     ->label('Awaiting user')
                                     ->options(function (Get $get) {
                                         $barter_acquirer_id = $get('barter_acquirer_id');
@@ -247,7 +247,7 @@ class BarterTransactionResource extends Resource
                     })
                     ->sortable()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('awaiting_completed_user.name')
+                Tables\Columns\TextColumn::make('awaiting_user.name')
                     ->label('Awaiting user')
                     ->wrap()
                     ->sortable()

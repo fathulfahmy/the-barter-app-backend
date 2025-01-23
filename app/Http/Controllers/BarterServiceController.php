@@ -34,7 +34,7 @@ class BarterServiceController extends BaseController
             $categories = $request->input('categories', []);
 
             $query = BarterService::query()
-                ->when(!empty($search), function ($query) use ($search) {
+                ->when(! empty($search), function ($query) use ($search) {
                     $query->where(function ($query) use ($search) {
                         $query->where('title', 'like', "%{$search}%")
                             ->orWhere('description', 'like', "%{$search}%")
@@ -49,7 +49,7 @@ class BarterServiceController extends BaseController
                             });
                     });
                 })
-                ->when(!empty($categories), function ($query) use ($categories) {
+                ->when(! empty($categories), function ($query) use ($categories) {
                     $query->whereIn('barter_category_id', $categories);
                 })
                 ->when($mode === 'acquire', function ($query) {

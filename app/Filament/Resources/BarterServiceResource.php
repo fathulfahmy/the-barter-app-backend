@@ -6,10 +6,12 @@ use App\Filament\Resources\BarterServiceResource\Pages;
 use App\Models\BarterService;
 use Closure;
 use Filament\Forms;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -115,6 +117,17 @@ class BarterServiceResource extends Resource
                             ->default('enabled')
                             ->native(false)
                             ->required(),
+                        SpatieMediaLibraryFileUpload::make('images')
+                            ->helperText('Upload up to 5 images')
+                            ->collection('barter_service_images')
+                            ->image()
+                            ->multiple()
+                            ->maxFiles(5)
+                            ->imageEditor()
+                            ->imageResizeMode('cover')
+                            ->imageCropAspectRatio('1:1')
+                            ->fetchFileInformation(false)
+                            ->panelLayout('grid'),
                     ])
                     ->columnspan(1),
             ]);
@@ -157,6 +170,10 @@ class BarterServiceResource extends Resource
                     ->wrap()
                     ->sortable()
                     ->searchable()
+                    ->toggleable(),
+                SpatieMediaLibraryImageColumn::make('images')
+                    ->collection('barter_service_images')
+                    ->limit(5)
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()

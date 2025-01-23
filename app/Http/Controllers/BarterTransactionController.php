@@ -130,7 +130,7 @@ class BarterTransactionController extends BaseController
                 'amount' => $validated['amount'] ?? 0,
             ]);
 
-            if (!empty($validated['barter_service_ids'])) {
+            if (! empty($validated['barter_service_ids'])) {
                 $barter_invoice->barter_services()->attach($validated['barter_service_ids']);
             }
 
@@ -168,10 +168,10 @@ class BarterTransactionController extends BaseController
             if ($validated['status'] && ($validated['status'] === 'completed' || $validated['status'] === 'awaiting_completed')) {
                 if ($barter_transaction->status === 'awaiting_completed') {
                     $validated['status'] = 'completed';
-                    $validated['awaiting_completed_user_id'] = null;
+                    $validated['awaiting_user_id'] = null;
                 } else {
                     $validated['status'] = 'awaiting_completed';
-                    $validated['awaiting_completed_user_id'] = auth()->id();
+                    $validated['awaiting_user_id'] = auth()->id();
                 }
             }
 

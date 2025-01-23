@@ -30,6 +30,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserReportReason whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserReportReason withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserReportReason withoutTrashed()
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
  */
 class UserReportReason extends BaseModel
 {

@@ -12,7 +12,7 @@ use App\Models\UserReport;
 use App\Models\UserReportReason;
 use GetStream\StreamChat\Client;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class DatabaseSeeder extends Seeder
 {
@@ -23,23 +23,26 @@ class DatabaseSeeder extends Seeder
     {
         $this->clearMedia();
         $this->clearChat();
-        $this->seedUsers(10);
         $this->seedBarterCategories();
-        $this->seedBarterServices(5);
-        $this->seedBarterServiceImages(5);
-        $this->seedBarterTransactions(count: 1000);
         $this->seedUserReportReasons();
+        $this->seedAdmins(2);
+        $this->seedUsers(10);
+        $this->seedBarterServices(5);
+        $this->seedBarterTransactions(count: 1000);
+        $this->seedBarterReviews();
         $this->seedUserReports(10);
     }
 
     protected function clearMedia()
     {
-        if (Storage::disk('public')->exists('media')) {
-            Storage::disk('public')->deleteDirectory('media');
-            Storage::disk('public')->makeDirectory('media');
-        }
+        $directory = public_path('media');
 
-        $this->command->info('Cleared media directory');
+        if (File::exists($directory)) {
+            File::cleanDirectory($directory);
+            $this->command->info('Cleared media');
+        } else {
+            $this->command->warn("Directory does not exist: $directory");
+        }
     }
 
     protected function clearChat()
@@ -66,26 +69,28 @@ class DatabaseSeeder extends Seeder
         // wait for stream chat api delete to complete to prevent conflict with upsertion
         sleep(5);
 
-        $this->command->info('Cleared stream chat users, messages and conversations!');
+        $this->command->info('Cleared chat');
+    }
+
+    protected function seedAdmins(int $count)
+    {
+        for ($i = 0; $i < $count; $i++) {
+            $id = $i + 1;
+            User::factory()->create([
+                'name' => "Admin $id",
+                'email' => "admin$id@demo.com",
+                'role' => 'admin',
+            ]);
+        }
+
+        $this->command->info("Seeded $count admins");
     }
 
     protected function seedUsers(int $count): void
     {
-        $chat_client = new Client(config('app.stream_chat.key'), config('app.stream_chat.secret'));
-
-        $user = User::factory()->create([
-            'name' => 'Demo Admin 1',
-            'email' => 'admin1@demo.com',
-            'role' => 'admin',
-        ]);
-
-        $user = User::factory()->create([
-            'name' => 'Demo Admin 2',
-            'email' => 'admin2@demo.com',
-            'role' => 'admin',
-        ]);
-
         for ($i = 0; $i < $count; $i++) {
+            $gender = fake()->randomElement(['male', 'female']);
+
             if ($i === 0) {
                 $user = User::factory()->create([
                     'name' => 'Demo User 1',
@@ -97,17 +102,23 @@ class DatabaseSeeder extends Seeder
                     'email' => 'user2@demo.com',
                 ]);
             } else {
-                $user = User::factory()->create();
+                $name = fake()->name($gender);
+
+                $exploded = explode(' ', trim($name));
+                $cleaned = array_map(function ($part) {
+                    return preg_replace('/[^a-zA-Z0-9]/', '', $part);
+                }, $exploded);
+                $imploded = implode('.', $cleaned);
+                $email = strtolower($imploded).'@demo.com';
+
+                $user = User::factory()->create([
+                    'name' => $name,
+                    'email' => $email,
+                ]);
             }
 
-            $chat_client->upsertUsers([
-                [
-                    'id' => (string) $user->id,
-                    'name' => $user->name,
-                    'role' => 'user',
-                    'image' => $user->avatar['uri'],
-                ],
-            ]);
+            $this->addUserAvatar($user, $gender);
+            $this->addChatUser($user);
         }
 
         $this->command->info("Seeded $count users");
@@ -115,51 +126,59 @@ class DatabaseSeeder extends Seeder
 
     protected function seedBarterCategories(): void
     {
-        $categories = [
-            'Home Cleaning',
-            'Plumbing Services',
-            'Electrical Repairs',
-            'Gardening & Landscaping',
-            'Personal Training',
-            'Graphic Design',
-            'Web Development',
-            'Tutoring Services',
-            'Pet Care',
-            'Photography',
-        ];
+        $dataset = require database_path('dataset/barter_services.php');
 
-        foreach ($categories as $category) {
+        $barter_categories = array_keys($dataset);
+
+        foreach ($barter_categories as $category) {
             BarterCategory::factory()->create([
                 'name' => $category,
             ]);
         }
 
-        $this->command->info("Seeded categories");
+        $this->command->info('Seeded categories');
+    }
+
+    protected function seedUserReportReasons(): void
+    {
+        $reasons = require database_path('dataset/user_report_reasons.php');
+
+        foreach ($reasons as $reason) {
+            UserReportReason::factory()->create([
+                'name' => $reason,
+            ]);
+        }
+
+        $this->command->info('Seeded reasons');
     }
 
     protected function seedBarterServices(int $service_per_user): void
     {
-        User::isNotAdmin()->each(function (User $user) use ($service_per_user) {
-            BarterService::factory($service_per_user)->create([
-                'barter_provider_id' => $user->id,
-            ]);
-        });
+        $dataset = require database_path('dataset/barter_services.php');
+        $barter_category_count = count($dataset);
 
-        $this->command->info("Seeded $service_per_user services per user");
-    }
+        User::isNotAdmin()->each(function (User $user, $index) use ($dataset, $barter_category_count) {
+            $barter_category_id = $index % $barter_category_count + 1;
+            $barter_category = BarterCategory::where('id', $barter_category_id)->first();
 
-    protected function seedBarterServiceImages(int $image_per_service)
-    {
-        BarterService::all()->each(function (BarterService $barter_service) use ($image_per_service) {
-            for ($i = 0; $i < $image_per_service; $i++) {
-                $barter_service
-                    ->addMedia(config('app.default.image.path'))
-                    ->preservingOriginal()
-                    ->toMediaCollection('barter_service_images');
+            foreach ($dataset[$barter_category->name] as $data) {
+                $title = $data['title'] ?? 'Default Service';
+                $description = $data['description'] ?? 'Default service description';
+                $price_unit = $data['price_unit'] ?? 'session';
+
+                $barter_service = BarterService::factory()->create([
+                    'barter_provider_id' => $user->id,
+                    'barter_category_id' => $barter_category_id,
+                    'title' => $title,
+                    'description' => $description,
+                    'price_unit' => $price_unit,
+                ]);
+
+                $this->addBarterServiceImages($barter_service);
             }
         });
 
-        $this->command->info("Seeded $image_per_service images per service");
+        $this->command->info("Seeded $service_per_user services per user");
     }
 
     protected function seedBarterTransactions(int $count): void
@@ -182,68 +201,138 @@ class DatabaseSeeder extends Seeder
                     'barter_transaction_id' => $barter_transaction->id,
                 ]);
 
-                $barter_invoice->barter_services()->attach(
-                    $user->barter_services->pluck('id')->random(2)
-                );
+                if ($user->barter_services->isNotEmpty()) {
+                    $barter_invoice->barter_services()->attach(
+                        $user->barter_services->pluck('id')->random(rand(1, $user->barter_services->count()))
+                    );
+                }
 
                 if ($barter_transaction->status === 'awaiting_completed') {
                     $random_id = fake()->randomElement([$barter_transaction->barter_acquirer_id, $barter_transaction->barter_provider_id]);
-                    $barter_transaction->update(['awaiting_completed_user_id' => $random_id]);
+                    $barter_transaction->timestamps = false;
+                    $barter_transaction->update([
+                        'awaiting_user_id' => $random_id,
+                        'updated_at' => $barter_transaction->created_at,
+                    ]);
+                    $barter_transaction->timestamps = true;
                 }
 
-                if ($barter_transaction->status === 'completed') {
-                    if (rand(0, 1)) {
-                        BarterReview::factory()->create([
-                            'author_id' => $barter_transaction->barter_acquirer_id,
-                            'barter_transaction_id' => $barter_transaction->id,
-                        ]);
-                    }
-
-                    if (rand(0, 1)) {
-                        BarterReview::factory()->create([
-                            'author_id' => $barter_transaction->barter_provider_id,
-                            'barter_transaction_id' => $barter_transaction->id,
-                        ]);
-                    }
-                }
             }
         }
 
         $this->command->info("Seeded $count transactions");
     }
 
-    protected function seedUserReportReasons(): void
+    protected function seedBarterReviews()
     {
-        $reasons = [
-            'Inappropriate content or behavior',
-            'Fraudulent or scam activity',
-            'Harassment or abusive language',
-            'Violation of terms and conditions',
-            'False information or misleading content',
-            'Spam or irrelevant content',
-            'Unauthorized transaction or payment issues',
-            'Intellectual property infringement',
-            'Privacy violation or data misuse',
-            'Impersonation or identity theft',
-        ];
+        BarterTransaction::where('status', 'completed')->inRandomOrder()->each(function (BarterTransaction $barter_transaction) {
+            if (rand(0, 1)) {
+                BarterReview::factory()->create([
+                    'author_id' => $barter_transaction->barter_acquirer_id,
+                    'barter_transaction_id' => $barter_transaction->id,
+                ]);
+            }
 
-        foreach ($reasons as $reason) {
-            UserReportReason::factory()->create([
-                'name' => $reason,
-            ]);
-        }
+            if (rand(0, 1)) {
+                BarterReview::factory()->create([
+                    'author_id' => $barter_transaction->barter_provider_id,
+                    'barter_transaction_id' => $barter_transaction->id,
+                ]);
+            }
+        });
 
-        $this->command->info("Seeded reasons");
+        $this->command->info('Seeded reviews');
     }
 
     protected function seedUserReports(int $count_per_user)
     {
-        User::isNotAdmin()->each(function (User $user) use ($count_per_user) {
+        $user_report_reason = UserReportReason::inRandomOrder()->first();
+        $user_report_reason_id = $user_report_reason->id;
+
+        User::isNotAdmin()->each(function (User $user) use ($count_per_user, $user_report_reason_id) {
             UserReport::factory($count_per_user)->create([
                 'author_id' => $user->id,
+                'user_report_reason_id' => $user_report_reason_id,
             ]);
         });
 
         $this->command->info("Seeded $count_per_user reports per user");
+    }
+
+    protected function addUserAvatar($user, string $gender)
+    {
+        $path = public_path("/seeders/user_avatar/$gender");
+
+        if (File::exists($path)) {
+            $files = File::files($path);
+
+            if (! empty($files)) {
+                $file = $files[array_rand($files)];
+                $user
+                    ->addMedia($file)
+                    ->preservingOriginal()
+                    ->toMediaCollection('user_avatar');
+
+                return;
+
+            } else {
+                $this->command->warn("File does not exist: $path");
+            }
+        } else {
+            $this->command->warn("Directory does not exist: $path");
+        }
+
+        $user
+            ->addMedia(config('app.default.image.path'))
+            ->preservingOriginal()
+            ->toMediaCollection('barter_service_images');
+    }
+
+    protected function addChatUser($user)
+    {
+        $chat_client = new Client(config('app.stream_chat.key'), config('app.stream_chat.secret'));
+
+        $chat_client->upsertUsers([
+            [
+                'id' => (string) $user->id,
+                'name' => $user->name,
+                'role' => 'user',
+                'image' => $user->avatar['uri'],
+            ],
+        ]);
+    }
+
+    protected function addBarterServiceImages($barter_service)
+    {
+        $category = $barter_service->barter_category->name;
+        $path = public_path("/seeders/barter_service_images/$category");
+
+        if (File::exists($path)) {
+            $files = File::files($path);
+            $files = fake()->randomElements($files, 5, false);
+
+            if (! empty($files)) {
+                foreach ($files as $file) {
+                    $barter_service
+                        ->addMedia($file)
+                        ->preservingOriginal()
+                        ->toMediaCollection('barter_service_images');
+                }
+
+                return;
+
+            } else {
+                $this->command->warn("File does not exist: $path");
+            }
+        } else {
+            $this->command->warn("Directory does not exist: $path");
+        }
+
+        for ($i = 0; $i < 5; $i++) {
+            $barter_service
+                ->addMedia(config('app.default.image.path'))
+                ->preservingOriginal()
+                ->toMediaCollection('barter_service_images');
+        }
     }
 }

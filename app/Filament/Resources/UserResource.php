@@ -6,11 +6,13 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use App\Models\UserReportReason;
 use Filament\Forms;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -46,6 +48,14 @@ class UserResource extends Resource
             ->schema([
                 Forms\Components\Section::make()
                     ->schema([
+                        SpatieMediaLibraryFileUpload::make('avatar')
+                            ->collection('user_avatar')
+                            ->image()
+                            ->avatar()
+                            ->imageEditor()
+                            ->circleCropper()
+                            ->fetchFileInformation(false)
+                            ->visibility('public'),
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->rules(['string', 'max:255']),
@@ -120,6 +130,10 @@ class UserResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                SpatieMediaLibraryImageColumn::make('avatar')
+                    ->collection('user_avatar')
+                    ->circular()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('name')
                     ->wrap()
                     ->sortable()

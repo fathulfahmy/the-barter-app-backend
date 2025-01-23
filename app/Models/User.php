@@ -87,6 +87,12 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereSuspensionEndsAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereSuspensionReasonId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereSuspensionStartsAt($value)
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User isSuspendedPermanently()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User isSuspendedTemporarily()
  */
 #[ObservedBy([UserObserver::class])]
 class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, FilamentUser
@@ -217,9 +223,10 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
     public function registerMediaCollections(): void
     {
         $this
-            ->addMediaCollection('user_avatar')->singleFile()
+            ->addMediaCollection('user_avatar')
+            ->singleFile()
             ->useFallbackUrl(config('app.default.image.uri'))
-            ->useFallbackPath(public_path(config('app.default.image.uri')))
+            ->useFallbackPath(config('app.default.image.path'))
             ->registerMediaConversions(function (Media $media) {
                 $this
                     ->addMediaConversion('thumb')

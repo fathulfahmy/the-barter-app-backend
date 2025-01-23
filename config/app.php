@@ -133,9 +133,9 @@ return [
     'default' => [
         'pagination' => 10,
         'image' => [
-            'uri' => env('APP_URL').'/storage/images/placeholder_500_500.png',
-            'path' => storage_path('app/public/images/placeholder_500_500.png'),
-            'name' => 'placeholder_image_500_500.png',
+            'uri' => env('APP_URL').'/images/placeholder_500_500.png',
+            'path' => public_path('images/placeholder_500_500.png'),
+            'name' => 'placeholder_500_500.png',
             'type' => 'image/png',
         ],
     ],
