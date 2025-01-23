@@ -80,6 +80,8 @@ class DatabaseSeeder extends Seeder
                 'name' => "Admin $id",
                 'email' => "admin$id@demo.com",
                 'role' => 'admin',
+                'bank_name' => null,
+                'bank_account_number' => null,
             ]);
         }
 

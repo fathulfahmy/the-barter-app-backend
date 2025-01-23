@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -33,6 +34,10 @@ class UserController extends BaseController
             Gate::authorize('update', $user);
 
             $validated = $request->validated();
+
+            if (! empty($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
+            }
 
             $user->update(Arr::except($validated, ['avatar']));
 

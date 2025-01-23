@@ -35,11 +35,10 @@ class AuthController extends BaseController
         try {
             DB::beginTransaction();
 
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
+            $validated = $request->validated();
+            $validated['password'] = Hash::make($validated['password']);
+
+            $user = User::create($validated);
 
             $request->authenticate();
             $auth_token = $user->createToken('auth-token')->plainTextToken;

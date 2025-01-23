@@ -30,6 +30,27 @@ class UserFactory extends Factory
         }, $exploded);
         $imploded = implode('.', $cleaned);
         $email = strtolower($imploded).'@demo.com';
+
+        $bank_name = fake()->randomElement([
+            'Affin Bank',
+            'Agro Bank',
+            'Alliance Bank',
+            'Ambank',
+            'Bank Islam',
+            'Bank Muamalat',
+            'Bank Rakyat',
+            'Bank Simpanan Malaysia',
+            'CIMB Bank',
+            'Hong Leong Bank',
+            'HSBC Bank',
+            'Maybank',
+            'OCBC Bank',
+            'Public Bank',
+            'RHB Bank',
+            'Standard Chartered Bank',
+            'United Overseas Bank',
+        ]);
+
         $date = fake()->dateTimeThisMonth();
 
         return [
@@ -38,6 +59,8 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'bank_name' => $bank_name,
+            'bank_account_number' => fake('ms_MY')->bankAccountNumber(),
             'created_at' => $date,
             'updated_at' => $date,
         ];

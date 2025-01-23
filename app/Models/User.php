@@ -93,6 +93,12 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User isSuspendedPermanently()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User isSuspendedTemporarily()
+ *
+ * @property string|null $bank_name
+ * @property string|null $bank_account_number
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereBankAccountNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereBankName($value)
  */
 #[ObservedBy([UserObserver::class])]
 class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, FilamentUser
@@ -110,6 +116,8 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
         'name',
         'email',
         'password',
+        'bank_name',
+        'bank_account_number',
         'role',
         'suspension_starts_at',
         'suspension_ends_at',

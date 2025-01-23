@@ -63,6 +63,34 @@ class UserResource extends Resource
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->rules(['string', 'email', 'max:255']),
+                        Forms\Components\Select::make('bank_name')
+                            ->native(false)
+                            ->options([
+                                'Affin Bank',
+                                'Agro Bank',
+                                'Alliance Bank',
+                                'Ambank',
+                                'Bank Islam',
+                                'Bank Muamalat',
+                                'Bank Rakyat',
+                                'Bank Simpanan Malaysia',
+                                'CIMB Bank',
+                                'Hong Leong Bank',
+                                'HSBC Bank',
+                                'Maybank',
+                                'OCBC Bank',
+                                'Public Bank',
+                                'RHB Bank',
+                                'Standard Chartered Bank',
+                                'United Overseas Bank',
+                            ])
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->rules(['string', 'max:255']),
+                        Forms\Components\TextInput::make('bank_account_number')
+                            ->required()
+                            ->rules(['string', 'max:255']),
                         Forms\Components\TextInput::make('password')
                             ->password()
                             ->revealable()
@@ -139,6 +167,16 @@ class UserResource extends Resource
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
+                    ->wrap()
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('bank_name')
+                    ->wrap()
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('bank_account_number')
                     ->wrap()
                     ->sortable()
                     ->searchable()

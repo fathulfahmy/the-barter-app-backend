@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('barter_reviews', function (Blueprint $table) {
             $table->id();
             $table->text('description');
-            $table->decimal('rating', 2, 1)->default(0);
+            $table->integer('rating')->default(1);
 
             $table->unsignedBigInteger('author_id');
             $table->foreign('author_id')->references('id')->on('users');

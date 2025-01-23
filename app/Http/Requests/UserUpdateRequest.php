@@ -28,6 +28,8 @@ class UserUpdateRequest extends BaseRequest
             'avatar' => ['sometimes', 'nullable'],
             'email' => ['sometimes', 'required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore(auth()->id())],
             'password' => ['sometimes', 'required', 'confirmed', Password::defaults()],
+            'bank_name' => ['sometimes', 'required', 'string', 'max:255'],
+            'bank_account_number' => ['sometimes', 'required', 'string', 'max:255'],
         ];
     }
 }
