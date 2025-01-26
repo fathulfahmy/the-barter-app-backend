@@ -19,10 +19,10 @@ class StatsController extends Controller
     public function barter_transactions_monthly_group_by_status()
     {
         try {
-            $start_date = now()->startOfMonth();
-            $end_date = now();
+            $start_date = now()->startOfMonth()->startofday();
+            $end_date = now()->endOfDay();
 
-            $transactions = BarterTransaction::query()
+            $barter_transactions = BarterTransaction::query()
                 ->where(function ($query) {
                     $query->where('barter_provider_id', auth()->id())
                         ->orWhere('barter_acquirer_id', auth()->id());
@@ -32,17 +32,18 @@ class StatsController extends Controller
 
             $dates = collect(range($start_date->day, $end_date->day))
                 ->map(function ($day) use ($start_date) {
-                    $date = $start_date->copy()->addDays($day - 1);
+
+                    $date = $start_date->copy()->addDays($day - 1)->endOfDay();
 
                     return [
-                        'date' => $date->format('Y-m-d'),
+                        'date' => $date,
                         'label' => $date->format('j M Y'),
                     ];
                 });
 
             $stats = [
-                $dates->map(function ($date) use ($transactions) {
-                    $count = $transactions
+                $dates->map(function ($date) use ($barter_transactions) {
+                    $count = $barter_transactions
                         ->where('updated_at', '<=', $date['date'])
                         ->whereIn('status', ['accepted', 'awaiting_completed'])
                         ->count();
@@ -53,8 +54,8 @@ class StatsController extends Controller
                     ];
                 })->values()->toArray(),
 
-                $dates->map(function ($date) use ($transactions) {
-                    $count = $transactions
+                $dates->map(function ($date) use ($barter_transactions) {
+                    $count = $barter_transactions
                         ->where('updated_at', '<=', $date['date'])
                         ->whereIn('status', ['completed'])
                         ->count();
@@ -84,27 +85,39 @@ class StatsController extends Controller
      */
     public function barter_services_monthly_trending()
     {
-        $start_date = now()->startOfMonth();
-        $end_date = now();
+        $start_date = now()->startOfMonth()->startofday();
+        $end_date = now()->endOfDay();
 
         try {
             $stats = BarterService::query()
-                ->select(['id', 'title'])
                 ->where('barter_provider_id', auth()->id())
                 ->withCount([
-                    'barter_transactions as barter_transactions_count',
+                    'barter_transactions as barter_transactions_count' => function ($query) {
+                        $query->where('status', 'completed');
+                    },
                     'barter_invoices as barter_invoices_count' => function ($query) use ($start_date, $end_date) {
-                        $query->whereBetween('created_at', [$start_date, $end_date]);
+                        $query
+                            ->whereBetween('created_at', [$start_date, $end_date])
+                            ->whereHas('barter_transaction', function ($q) {
+                                $q->where('status', 'completed');
+                            });
                     },
                 ])
                 ->take(5)
                 ->get()
                 ->map(function ($barter_service) {
+                    $value = $barter_service->barter_transactions_count + $barter_service->barter_invoices_count;
+
+                    if ($value <= 0) {
+                        return null;
+                    }
+
                     return [
-                        'value' => $barter_service->barter_transactions_count + $barter_service->barter_invoices_count,
+                        'value' => $value,
                         'label' => $barter_service->title,
                     ];
                 })
+                ->filter()
                 ->sortByDesc('value')
                 ->values()
                 ->toArray();

@@ -195,6 +195,14 @@ class BarterServiceController extends BaseController
 
             $barter_service = BarterService::findOrFail($barter_service_id);
 
+            $ongoing_transactions = $barter_service->barter_transactions()
+                ->whereIn('status', ['accepted', 'awaiting_completed'])
+                ->exists();
+
+            if ($ongoing_transactions) {
+                return response()->apiError('Failed to delete service with ongoing barters');
+            }
+
             Gate::authorize('delete', $barter_service);
 
             $barter_service->delete();

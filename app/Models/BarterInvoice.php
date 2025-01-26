@@ -3,23 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * @property int $id
- * @property int $barter_acquirer_id
- * @property int $barter_transaction_id
+ * @property string $id
  * @property float $amount
+ * @property string $barter_acquirer_id
+ * @property string $barter_transaction_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
  * @property-read \App\Models\User $barter_acquirer
  * @property-read \App\Models\BarterInvoiceBarterService|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BarterService> $barter_services
  * @property-read int|null $barter_services_count
  * @property-read \App\Models\BarterTransaction $barter_transaction
- * @property-read mixed $exchanged_services
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
  * @property-read int|null $media_count
  *
@@ -34,13 +34,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterInvoice whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterInvoice whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterInvoice whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterInvoice whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterInvoice whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterInvoice withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterInvoice withoutTrashed()
- *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
- * @property-read int|null $activities_count
  */
 class BarterInvoice extends BaseModel
 {
@@ -70,8 +66,8 @@ class BarterInvoice extends BaseModel
         return $this->belongsTo(BarterTransaction::class, 'barter_transaction_id');
     }
 
-    public function barter_services(): BelongsToMany
+    public function barter_services()
     {
-        return $this->belongsToMany(BarterService::class)->using(BarterInvoiceBarterService::class);
+        return $this->belongsToMany(BarterService::class)->using(BarterInvoiceBarterService::class)->withTrashed();
     }
 }

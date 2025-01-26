@@ -50,8 +50,7 @@ class UserReportController extends BaseController
 
             $validated = $request->validated();
 
-            $author_id = auth()->id();
-            $validated['author_id'] = $author_id;
+            $validated['reporter_id'] = auth()->id();
 
             $user_report = UserReport::create($validated);
 

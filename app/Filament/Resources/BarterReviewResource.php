@@ -65,8 +65,8 @@ class BarterReviewResource extends Resource
                             ->native(false)
                             ->required()
                             ->rules(['exists:barter_transactions,id']),
-                        Forms\Components\Select::make('author_id')
-                            ->label('Author')
+                        Forms\Components\Select::make('reviewer_id')
+                            ->label('Reviewer')
                             ->options(function (Get $get) {
                                 $barter_transaction_id = $get('barter_transaction_id');
 
@@ -111,7 +111,7 @@ class BarterReviewResource extends Resource
                     ->label('Transaction ID')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('author.name')
+                Tables\Columns\TextColumn::make('reviewer.name')
                     ->wrap()
                     ->sortable()
                     ->searchable()

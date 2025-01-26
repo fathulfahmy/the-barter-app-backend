@@ -190,7 +190,7 @@ class UserResource extends Resource
                     ->label('Suspension ends')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('suspension_reason.name')
                     ->label('Suspension reason')
                     ->wrap()

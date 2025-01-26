@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * @property int $id
+ * @property string $id
  * @property string $name
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BarterService> $barter_services
  * @property-read int|null $barter_services_count
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
@@ -18,21 +21,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Database\Factories\BarterCategoryFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory whereUpdatedAt($value)
- *
- * @property \Illuminate\Support\Carbon|null $deleted_at
- *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterCategory withoutTrashed()
- *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
- * @property-read int|null $activities_count
  */
 class BarterCategory extends BaseModel
 {

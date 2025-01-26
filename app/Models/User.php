@@ -24,17 +24,25 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
- * @property int $id
+ * @property string $id
  * @property string $name
  * @property string $email
  * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @property string $password
+ * @property string|null $bank_name
+ * @property string|null $bank_account_number
+ * @property string $role
  * @property string|null $remember_token
+ * @property \Illuminate\Support\Carbon|null $suspension_starts_at
+ * @property \Illuminate\Support\Carbon|null $suspension_ends_at
+ * @property int|null $suspension_reason_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BarterTransaction> $acquired_barter_transactions
  * @property-read int|null $acquired_barter_transactions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BarterInvoice> $barter_invoices
  * @property-read int|null $barter_invoices_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BarterReview> $barter_reviews
@@ -42,20 +50,32 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BarterService> $barter_services
  * @property-read int|null $barter_services_count
  * @property-read mixed $avatar
+ * @property-read mixed $is_admin
+ * @property-read mixed $is_suspended_permanently
+ * @property-read mixed $is_suspended_temporarily
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
  * @property-read int|null $media_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BarterTransaction> $provided_barter_transactions
  * @property-read int|null $provided_barter_transactions_count
+ * @property-read \App\Models\UserReportReason|null $suspension_reason
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UserReport> $user_reports
+ * @property-read int|null $user_reports_count
  *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User isAdmin()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User isNotAdmin()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User isSuspendedPermanently()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User isSuspendedTemporarily()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereBankAccountNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereBankName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmail($value)
@@ -64,41 +84,13 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePassword($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRememberToken($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
- *
- * @property string $role
- * @property-read mixed $is_admin
- *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User isAdmin()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User isNotAdmin()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRole($value)
- *
- * @property \Illuminate\Support\Carbon|null $suspension_starts_at
- * @property \Illuminate\Support\Carbon|null $suspension_ends_at
- * @property int|null $suspension_reason_id
- * @property-read mixed $is_suspended_permanently
- * @property-read mixed $is_suspended_temporarily
- * @property-read \App\Models\UserReportReason|null $suspension_reason
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UserReport> $user_reports
- * @property-read int|null $user_reports_count
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereSuspensionEndsAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereSuspensionReasonId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereSuspensionStartsAt($value)
- *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
- * @property-read int|null $activities_count
- *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User isSuspendedPermanently()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User isSuspendedTemporarily()
- *
- * @property string|null $bank_name
- * @property string|null $bank_account_number
- *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereBankAccountNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereBankName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
  */
 #[ObservedBy([UserObserver::class])]
 class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, FilamentUser
@@ -187,12 +179,12 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
 
     public function barter_reviews(): HasMany
     {
-        return $this->hasMany(BarterReview::class, 'author_id');
+        return $this->hasMany(BarterReview::class, 'reviewer_id');
     }
 
     public function user_reports(): HasMany
     {
-        return $this->hasMany(UserReport::class, 'author_id');
+        return $this->hasMany(UserReport::class, 'reporter_id');
     }
 
     public function suspension_reason(): BelongsTo

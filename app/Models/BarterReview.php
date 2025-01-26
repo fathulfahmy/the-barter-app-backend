@@ -5,28 +5,31 @@ namespace App\Models;
 use App\Observers\BarterReviewObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 /**
- * @property int $id
- * @property int $author_id
- * @property int $barter_service_id
- * @property int $barter_transaction_id
+ * @property string $id
  * @property string $description
  * @property float $rating
+ * @property string $reviewer_id
+ * @property string|null $barter_service_id
+ * @property string $barter_transaction_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\User $author
- * @property-read \App\Models\BarterService $barter_service
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
+ * @property-read \App\Models\BarterService|null $barter_service
  * @property-read \App\Models\BarterTransaction $barter_transaction
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
  * @property-read int|null $media_count
+ * @property-read \App\Models\User $reviewer
  *
  * @method static \Database\Factories\BarterReviewFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview whereAuthorId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview whereBarterServiceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview whereBarterTransactionId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview whereCreatedAt($value)
@@ -34,15 +37,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview whereDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview whereRating($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview whereReviewerId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterReview withoutTrashed()
- *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
- * @property-read int|null $activities_count
  */
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 #[ObservedBy([BarterReviewObserver::class])]
 class BarterReview extends BaseModel
 {
@@ -54,7 +53,7 @@ class BarterReview extends BaseModel
      * @var array<int, string>
      */
     protected $fillable = [
-        'author_id',
+        'reviewer_id',
         'barter_service_id',
         'barter_transaction_id',
         'description',
@@ -62,14 +61,14 @@ class BarterReview extends BaseModel
     ];
 
     /* ======================================== RELATIONSHIPS */
-    public function author(): BelongsTo
+    public function reviewer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'author_id');
+        return $this->belongsTo(User::class, 'reviewer_id');
     }
 
-    public function barter_service(): BelongsTo
+    public function barter_service()
     {
-        return $this->belongsTo(BarterService::class, 'barter_service_id');
+        return $this->belongsTo(BarterService::class, 'barter_service_id')->withTrashed();
     }
 
     public function barter_transaction(): BelongsTo

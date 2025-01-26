@@ -10,15 +10,14 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
  * @property-read int|null $media_count
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BaseModel newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BaseModel newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BaseModel query()
- *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
- * @property-read int|null $activities_count
  */
 class BaseModel extends Model implements HasMedia
 {
@@ -36,7 +35,8 @@ class BaseModel extends Model implements HasMedia
         'barter_provider_id' => 'string',
         'barter_acquirer_id' => 'string',
         'awaiting_user_id' => 'string',
-        'author_id' => 'string',
+        'reviewer_id' => 'string',
+        'reporter_id' => 'string',
         'barter_service_id' => 'string',
         'barter_transaction_id' => 'string',
         'barter_invoice_id' => 'string',

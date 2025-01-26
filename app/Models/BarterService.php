@@ -9,19 +9,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
- * @property int $id
- * @property int $barter_provider_id
- * @property int $barter_category_id
+ * @property string $id
  * @property string $title
  * @property string $description
  * @property float $min_price
  * @property float $max_price
  * @property string $price_unit
- * @property float $rating
  * @property string $status
+ * @property string $barter_provider_id
+ * @property int $barter_category_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
  * @property-read \App\Models\BarterCategory $barter_category
  * @property-read \App\Models\BarterInvoiceBarterService|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BarterInvoice> $barter_invoices
@@ -34,6 +35,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property-read int $completed_count
  * @property-read mixed $images
  * @property-read int $pending_count
+ * @property-read mixed $rating
+ * @property-read mixed $reviews_count
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
  * @property-read int|null $media_count
  *
@@ -51,16 +54,11 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterService whereMaxPrice($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterService whereMinPrice($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterService wherePriceUnit($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterService whereRating($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterService whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterService whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterService whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterService withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterService withoutTrashed()
- *
- * @property-read mixed $reviews_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
- * @property-read int|null $activities_count
  */
 class BarterService extends BaseModel
 {

@@ -33,18 +33,20 @@ class BarterReviewController extends BaseController
 
             $query = BarterReview::query()
                 ->with([
-                    'author',
+                    'reviewer',
                     'barter_transaction.barter_service',
                     'barter_transaction.barter_invoice',
                 ])
                 ->when($barter_service_id, function ($query) use ($barter_service_id) {
                     $query->where('barter_service_id', $barter_service_id);
                 })
-                ->when(! $barter_service_id, function ($query) {
-                    $query->where('author_id', auth()->id());
+                ->when($barter_service_id, function ($query) {
+                    $query->where('reviewer_id', auth()->id());
                 });
 
-            $barter_reviews = $query->paginate(config('app.default.pagination'));
+            $barter_reviews = $query
+                ->orderByDesc('updated_at')
+                ->paginate(config('app.default.pagination'));
 
             return response()->apiSuccess('Reviews fetched successfully', $barter_reviews);
 
@@ -66,7 +68,7 @@ class BarterReviewController extends BaseController
     {
         try {
             $barter_review = BarterReview::with([
-                'author',
+                'reviewer',
                 'barter_transaction.barter_service',
                 'barter_transaction.barter_invoice',
             ])
@@ -97,7 +99,7 @@ class BarterReviewController extends BaseController
 
             $barter_transaction = BarterTransaction::findOrFail($validated['barter_transaction_id']);
 
-            $validated['author_id'] = auth()->id();
+            $validated['reviewer_id'] = auth()->id();
             $validated['barter_transaction_id'] = $barter_transaction->id;
 
             $barter_review = BarterReview::create($validated);

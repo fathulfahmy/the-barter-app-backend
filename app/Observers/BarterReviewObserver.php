@@ -23,7 +23,7 @@ class BarterReviewObserver implements ShouldHandleEventsAfterCommit
                 return;
             }
 
-            $is_user_acquirer = $barter_review->author_id == $barter_transaction->barter_acquirer_id;
+            $is_user_acquirer = $barter_review->reviewer_id == $barter_transaction->barter_acquirer_id;
 
             if ($is_user_acquirer) {
                 $barter_service = $barter_transaction->barter_service;
@@ -43,7 +43,7 @@ class BarterReviewObserver implements ShouldHandleEventsAfterCommit
                         BarterReview::create([
                             'barter_transaction_id' => $barter_review->barter_transaction_id,
                             'barter_service_id' => $barter_service->id,
-                            'author_id' => $barter_review->author_id,
+                            'reviewer_id' => $barter_review->reviewer_id,
                             'rating' => $barter_review->rating,
                             'description' => $barter_review->description,
                         ]);
@@ -51,6 +51,7 @@ class BarterReviewObserver implements ShouldHandleEventsAfterCommit
                 }
             }
 
+            $barter_review->barter_transaction->touch();
         });
     }
 
@@ -62,13 +63,14 @@ class BarterReviewObserver implements ShouldHandleEventsAfterCommit
         BarterReview::withoutEvents(function () use ($barter_review) {
 
             BarterReview::query()
-                ->where('author_id', $barter_review->author_id)
+                ->where('reviewer_id', $barter_review->reviewer_id)
                 ->where('barter_transaction_id', $barter_review->barter_transaction_id)
                 ->update([
                     'rating' => $barter_review->rating,
                     'description' => $barter_review->description,
                 ]);
 
+            $barter_review->barter_transaction->touch();
         });
     }
 

@@ -8,20 +8,25 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * @property int $id
- * @property int $barter_acquirer_id
- * @property int $barter_provider_id
- * @property int $barter_service_id
+ * @property string $id
  * @property string $status
+ * @property string $barter_acquirer_id
+ * @property string $barter_provider_id
+ * @property string|null $awaiting_user_id
+ * @property string $barter_service_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
+ * @property-read \App\Models\User|null $awaiting_user
  * @property-read \App\Models\User $barter_acquirer
  * @property-read \App\Models\BarterInvoice|null $barter_invoice
  * @property-read \App\Models\User $barter_provider
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BarterReview> $barter_reviews
  * @property-read int|null $barter_reviews_count
  * @property-read \App\Models\BarterService $barter_service
+ * @property-read mixed $other_user
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
  * @property-read int|null $media_count
  *
@@ -30,6 +35,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction whereAwaitingUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction whereBarterAcquirerId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction whereBarterProviderId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction whereBarterServiceId($value)
@@ -40,17 +46,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction withoutTrashed()
- *
- * @property string|null $awaiting_user_id
- * @property-read \App\Models\User|null $awaiting_user
- *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction whereAwaitingCompletedUserId($value)
- *
- * @property-read mixed $other_user
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
- * @property-read int|null $activities_count
- *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction whereAwaitingUserId($value)
  */
 class BarterTransaction extends BaseModel
 {
@@ -97,9 +92,9 @@ class BarterTransaction extends BaseModel
         return $this->belongsTo(User::class, 'awaiting_user_id');
     }
 
-    public function barter_service(): BelongsTo
+    public function barter_service()
     {
-        return $this->belongsTo(BarterService::class, 'barter_service_id');
+        return $this->belongsTo(BarterService::class, 'barter_service_id')->withTrashed();
     }
 
     public function barter_invoice(): HasOne

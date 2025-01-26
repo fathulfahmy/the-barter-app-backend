@@ -34,7 +34,7 @@ class BarterTransactionController extends BaseController
             $barter_service_id = $request->input('barter_service_id');
 
             $query = BarterTransaction::query()
-                ->with(['barter_acquirer', 'barter_provider', 'barter_service', 'barter_invoice'])
+                ->with(['barter_acquirer', 'barter_provider', 'barter_service', 'barter_invoice', 'barter_reviews'])
                 ->when($barter_service_id, function ($query) use ($barter_service_id) {
                     $query->where('barter_service_id', $barter_service_id);
                 })
@@ -47,22 +47,35 @@ class BarterTransactionController extends BaseController
                         ->where('status', 'pending');
                 })
                 ->when($mode === 'ongoing', function ($query) {
-                    $query->where(function ($q) {
-                        $q->where('barter_acquirer_id', auth()->id())
-                            ->orWhere('barter_provider_id', auth()->id());
-                    })->whereIn('status', ['accepted', 'awaiting_completed']);
+                    $query
+                        ->where(function ($q) {
+                            $q->where('barter_acquirer_id', auth()->id())
+                                ->orWhere('barter_provider_id', auth()->id());
+                        })
+                        ->whereIn('status', ['accepted', 'awaiting_completed', 'completed'])
+                        ->whereDoesntHave('barter_reviews', function ($q) {
+                            $q->where('reviewer_id', auth()->id());
+                        });
                 })
                 ->when($mode === 'history', function ($query) {
-                    $query->where(function ($q) {
-                        $q->where('barter_acquirer_id', auth()->id())
-                            ->orWhere('barter_provider_id', auth()->id());
-                    })
-                        ->whereIn('status', ['rejected', 'completed'])
-                        ->with('barter_reviews');
+                    $query
+                        ->where(function ($q) {
+                            $q->where('barter_acquirer_id', auth()->id())
+                                ->orWhere('barter_provider_id', auth()->id());
+                        })
+                        ->where(function ($q) {
+                            $q->where('status', 'rejected')
+                                ->orWhere(function ($q) {
+                                    $q->where('status', 'completed')
+                                        ->whereHas('barter_reviews', function ($q) {
+                                            $q->where('reviewer_id', auth()->id());
+                                        });
+                                });
+                        });
                 });
 
             $barter_transactions = $query
-                ->orderBy('updated_at', 'desc')
+                ->orderByDesc('updated_at')
                 ->paginate(config('app.default.pagination'));
 
             return response()->apiSuccess('Transactions fetched successfully', $barter_transactions);

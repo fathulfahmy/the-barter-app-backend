@@ -16,8 +16,8 @@ return new class extends Migration
             $table->text('description');
             $table->integer('rating')->default(1);
 
-            $table->unsignedBigInteger('author_id');
-            $table->foreign('author_id')->references('id')->on('users');
+            $table->unsignedBigInteger('reviewer_id');
+            $table->foreign('reviewer_id')->references('id')->on('users');
 
             $table->unsignedBigInteger('barter_service_id')->nullable();
             $table->foreign('barter_service_id')->references('id')->on('barter_services');

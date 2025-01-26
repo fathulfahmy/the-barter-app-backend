@@ -75,9 +75,9 @@ class UserReportResource extends Resource
                     ->columnSpan(1),
                 Forms\Components\Section::make()
                     ->schema([
-                        Forms\Components\Select::make('author_id')
-                            ->label('Author')
-                            ->relationship('author', 'name', fn (Builder $query) => $query->isNotAdmin())
+                        Forms\Components\Select::make('reporter_id')
+                            ->label('Reporter')
+                            ->relationship('reporter', 'name', fn (Builder $query) => $query->isNotAdmin())
                             ->native(false)
                             ->searchable()
                             ->preload()
@@ -123,7 +123,7 @@ class UserReportResource extends Resource
                     ->wrap()
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('author.name')
+                Tables\Columns\TextColumn::make('reporter.name')
                     ->wrap()
                     ->sortable()
                     ->searchable(),

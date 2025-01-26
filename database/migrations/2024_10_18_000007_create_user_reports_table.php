@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('user_reports', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger('author_id');
-            $table->foreign('author_id')->references('id')->on('users');
+            $table->unsignedBigInteger('reporter_id');
+            $table->foreign('reporter_id')->references('id')->on('users');
 
             $table->unsignedBigInteger('user_report_reason_id');
             $table->foreign('user_report_reason_id')->references('id')->on('user_report_reasons');

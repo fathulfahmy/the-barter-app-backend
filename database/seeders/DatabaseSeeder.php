@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
         $this->seedAdmins(2);
         $this->seedUsers(10);
         $this->seedBarterServices(5);
-        $this->seedBarterTransactions(count: 1000);
+        $this->seedBarterTransactions(1000);
         $this->seedBarterReviews();
         $this->seedUserReports(10);
     }
@@ -230,14 +230,14 @@ class DatabaseSeeder extends Seeder
         BarterTransaction::where('status', 'completed')->inRandomOrder()->each(function (BarterTransaction $barter_transaction) {
             if (rand(0, 1)) {
                 BarterReview::factory()->create([
-                    'author_id' => $barter_transaction->barter_acquirer_id,
+                    'reviewer_id' => $barter_transaction->barter_acquirer_id,
                     'barter_transaction_id' => $barter_transaction->id,
                 ]);
             }
 
             if (rand(0, 1)) {
                 BarterReview::factory()->create([
-                    'author_id' => $barter_transaction->barter_provider_id,
+                    'reviewer_id' => $barter_transaction->barter_provider_id,
                     'barter_transaction_id' => $barter_transaction->id,
                 ]);
             }
@@ -254,7 +254,7 @@ class DatabaseSeeder extends Seeder
             $user_report_reason_id = $user_report_reason->random();
 
             UserReport::factory($count_per_user)->create([
-                'author_id' => $user->id,
+                'reporter_id' => $user->id,
                 'user_report_reason_id' => $user_report_reason_id,
             ]);
         });

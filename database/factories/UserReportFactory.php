@@ -29,7 +29,7 @@ class UserReportFactory extends Factory
         ];
 
         return [
-            'author_id' => fake()->numberBetween(1, 10),
+            'reporter_id' => fake()->numberBetween(1, 10),
             'user_report_reason_id' => fake()->numberBetween(1, 10),
             'model_id' => fake()->numberBetween(1, 10),
             'model_name' => fake()->randomElement($models),

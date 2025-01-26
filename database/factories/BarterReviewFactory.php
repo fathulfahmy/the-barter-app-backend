@@ -19,7 +19,7 @@ class BarterReviewFactory extends Factory
         $date = fake()->dateTimeThisMonth();
 
         return [
-            'author_id' => fake()->numberBetween(1, 10),
+            'reviewer_id' => fake()->numberBetween(1, 10),
             'barter_service_id' => fake()->numberBetween(1, 50),
             'barter_transaction_id' => fake()->numberBetween(1, 50),
             'description' => fake()->paragraph(),
