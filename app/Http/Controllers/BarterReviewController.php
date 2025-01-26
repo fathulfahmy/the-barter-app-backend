@@ -40,7 +40,7 @@ class BarterReviewController extends BaseController
                 ->when($barter_service_id, function ($query) use ($barter_service_id) {
                     $query->where('barter_service_id', $barter_service_id);
                 })
-                ->when($barter_service_id, function ($query) {
+                ->when(! $barter_service_id, function ($query) {
                     $query->where('reviewer_id', auth()->id());
                 });
 
