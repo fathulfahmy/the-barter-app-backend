@@ -136,4 +136,34 @@ class StatsController extends Controller
             return response()->apiError('Failed to fetch monthly trending services stats', $e->getMessage());
         }
     }
+
+    /**
+     * Get Tab Bar Badges
+     *
+     * @response array{
+     *      success: bool,
+     *      message: string,
+     *      data: array,
+     * }
+     */
+    public function tab_bar_badges()
+    {
+        try {
+            $pending_barter_transactions = 0;
+
+            $pending_barter_transactions = BarterTransaction::query()
+                ->where('barter_provider_id', auth()->id())
+                ->where('status', 'pending')
+                ->count();
+
+            $stats = [
+                'pending_barter_transactions' => $pending_barter_transactions,
+            ];
+
+            return response()->apiSuccess('Fetched tab bar badges successfully', $stats);
+
+        } catch (\Exception $e) {
+            return response()->apiError('Failed to fetch tab bar badges', $e->getMessage());
+        }
+    }
 }
