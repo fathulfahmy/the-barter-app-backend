@@ -64,9 +64,15 @@ class ActivityLogResource extends Resource
                     ->searchable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('subject_type')
-                    ->label('Model')
+                    ->label('Affected')
                     ->wrap()
                     ->formatStateUsing(fn ($state) => Str::of(class_basename($state))->replaceMatches('/([a-z0-9])([A-Z])/', '$1 $2')->title())
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('subject_id')
+                    ->label('Affected ID')
+                    ->numeric()
                     ->sortable()
                     ->searchable()
                     ->toggleable(),

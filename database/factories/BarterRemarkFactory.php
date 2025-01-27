@@ -16,11 +16,12 @@ class BarterRemarkFactory extends Factory
      */
     public function definition(): array
     {
+        $address = fake()->randomDigit().', '.fake('ms_MY')->township().', '.fake('ms_MY')->townState();
         $date = fake()->dateTimeThisMonth();
 
         return [
             'datetime' => rand(0, 1) ? fake()->dateTimeThisMonth() : null,
-            'address' => rand(0, 1) ? fake()->address() : null,
+            'address' => rand(0, 1) ? $address : null,
             'deliverables' => rand(0, 1) ? fake()->sentences(3) : null,
             'note' => rand(0, 1) ? fake()->sentence() : null,
             'created_at' => $date,
