@@ -1,14 +1,14 @@
 <?php
 
 return [
-    'Inappropriate content or behavior',
+    'Misleading or false information',
+    'Inappropriate or restricted content',
+    'Unfulfilled agreements',
+    'Unfair practices',
+    'Harassment or abusive behavior',
     'Fraudulent or scam activity',
-    'Harassment or abusive language',
-    'Violation of terms and conditions',
-    'False information or misleading content',
-    'Spam or irrelevant content',
-    'Unauthorized transaction or payment issues',
-    'Intellectual property infringement',
-    'Privacy violation or data misuse',
-    'Impersonation or identity theft',
+    'Spam or irrelevant communication',
+    'Fake or inappropriate reviews',
+    'Privacy violations',
+    'Impersonation or identity misuse',
 ];

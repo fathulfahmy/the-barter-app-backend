@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\BarterCategory;
 use App\Models\BarterInvoice;
+use App\Models\BarterRemark;
 use App\Models\BarterReview;
 use App\Models\BarterService;
 use App\Models\BarterTransaction;
@@ -29,6 +30,7 @@ class DatabaseSeeder extends Seeder
         $this->seedUsers(10);
         $this->seedBarterServices(5);
         $this->seedBarterTransactions(1000);
+        $this->seedBarterRemarks();
         $this->seedBarterReviews();
         $this->seedUserReports(10);
     }
@@ -163,6 +165,8 @@ class DatabaseSeeder extends Seeder
             $barter_category_id = $index % $barter_category_count + 1;
             $barter_category = BarterCategory::where('id', $barter_category_id)->first();
 
+            $date = fake()->dateTimeBetween($user->created_at);
+
             foreach ($dataset[$barter_category->name] as $data) {
                 $title = $data['title'] ?? 'Default Service';
                 $description = $data['description'] ?? 'Default service description';
@@ -174,6 +178,8 @@ class DatabaseSeeder extends Seeder
                     'title' => $title,
                     'description' => $description,
                     'price_unit' => $price_unit,
+                    'created_at' => $date,
+                    'updated_at' => $date,
                 ]);
 
                 $this->addBarterServiceImages($barter_service);
@@ -214,7 +220,6 @@ class DatabaseSeeder extends Seeder
                     $barter_transaction->timestamps = false;
                     $barter_transaction->update([
                         'awaiting_user_id' => $random_id,
-                        'updated_at' => $barter_transaction->created_at,
                     ]);
                     $barter_transaction->timestamps = true;
                 }
@@ -223,6 +228,28 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->command->info("Seeded $count transactions");
+    }
+
+    protected function seedBarterRemarks()
+    {
+
+        BarterTransaction::whereIn('status', ['accepted', 'awaiting_completed', 'completed'])->inRandomOrder()->each(function (BarterTransaction $barter_transaction) {
+            if (rand(0, 1)) {
+                BarterRemark::factory()->create([
+                    'user_id' => $barter_transaction->barter_acquirer_id,
+                    'barter_transaction_id' => $barter_transaction->id,
+                ]);
+            }
+
+            if (rand(0, 1)) {
+                BarterRemark::factory()->create([
+                    'user_id' => $barter_transaction->barter_provider_id,
+                    'barter_transaction_id' => $barter_transaction->id,
+                ]);
+            }
+        });
+
+        $this->command->info('Seeded remarks');
     }
 
     protected function seedBarterReviews()

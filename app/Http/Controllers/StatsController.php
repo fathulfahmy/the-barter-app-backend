@@ -98,8 +98,8 @@ class StatsController extends Controller
                     'barter_invoices as barter_invoices_count' => function ($query) use ($start_date, $end_date) {
                         $query
                             ->whereBetween('created_at', [$start_date, $end_date])
-                            ->whereHas('barter_transaction', function ($q) {
-                                $q->where('status', 'completed');
+                            ->whereHas('barter_transaction', function ($query) {
+                                $query->where('status', 'completed');
                             });
                     },
                 ])

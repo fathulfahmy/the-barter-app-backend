@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarterCategoryController;
 use App\Http\Controllers\BarterInvoiceController;
+use App\Http\Controllers\BarterRemarkController;
 use App\Http\Controllers\BarterReviewController;
 use App\Http\Controllers\BarterServiceController;
 use App\Http\Controllers\BarterTransactionController;
@@ -46,6 +47,13 @@ Route::middleware(['auth:sanctum', EnsureUserIsNotSuspended::class])->group(func
     Route::post('/barter_invoices', [BarterInvoiceController::class, 'store'])->name('api.barter_invoices.store');
     Route::patch('/barter_invoices/{barter_invoice_id}', [BarterInvoiceController::class, 'update'])->name('api.barter_invoices.update');
     Route::delete('/barter_invoices/{barter_invoice_id}', [BarterInvoiceController::class, 'destroy'])->name('api.barter_invoices.destroy');
+
+    // BARTER REMARKS
+    Route::get('/barter_remarks', [BarterRemarkController::class, 'index'])->name('api.barter_remarks.index');
+    Route::get('/barter_remarks/{barter_remark_id}', [BarterRemarkController::class, 'show'])->name('api.barter_remarks.show');
+    Route::post('/barter_remarks', [BarterRemarkController::class, 'store'])->name('api.barter_remarks.store');
+    Route::patch('/barter_remarks/{barter_remark_id}', [BarterRemarkController::class, 'update'])->name('api.barter_remarks.update');
+    Route::delete('/barter_remarks/{barter_remark_id}', [BarterRemarkController::class, 'destroy'])->name('api.barter_remarks.destroy');
 
     // BARTER REVIEWS
     Route::get('/barter_reviews', [BarterReviewController::class, 'index'])->name('api.barter_reviews.index');

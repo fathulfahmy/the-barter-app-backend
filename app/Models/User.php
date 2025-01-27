@@ -91,6 +91,9 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutTrashed()
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BarterRemark> $barter_remarks
+ * @property-read int|null $barter_remarks_count
  */
 #[ObservedBy([UserObserver::class])]
 class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, FilamentUser
@@ -180,6 +183,11 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
     public function barter_reviews(): HasMany
     {
         return $this->hasMany(BarterReview::class, 'reviewer_id');
+    }
+
+    public function barter_remarks(): HasMany
+    {
+        return $this->hasMany(BarterRemark::class, 'user_id');
     }
 
     public function user_reports(): HasMany

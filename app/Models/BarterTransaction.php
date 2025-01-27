@@ -46,6 +46,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|BarterTransaction withoutTrashed()
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BarterRemark> $barter_remarks
+ * @property-read int|null $barter_remarks_count
  */
 class BarterTransaction extends BaseModel
 {
@@ -105,5 +108,10 @@ class BarterTransaction extends BaseModel
     public function barter_reviews(): HasMany
     {
         return $this->hasMany(BarterReview::class, 'barter_transaction_id');
+    }
+
+    public function barter_remarks(): HasMany
+    {
+        return $this->hasMany(BarterRemark::class, 'barter_transaction_id');
     }
 }
