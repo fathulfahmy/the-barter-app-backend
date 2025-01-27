@@ -31,10 +31,45 @@ class BarterTransactionController extends BaseController
     {
         try {
             $mode = $request->input('mode');
+            $search = trim($request->input('search'));
             $barter_service_id = $request->input('barter_service_id');
 
             $query = BarterTransaction::query()
                 ->with(['barter_acquirer', 'barter_provider', 'barter_service', 'barter_invoice', 'barter_remarks', 'barter_reviews'])
+                ->when($search && $search !== '', function ($query) use ($search) {
+                    $datetime = $this->parseSearchDate($search);
+                    $query->where(function ($query) use ($search, $datetime) {
+                        $query->orWhereHas('barter_service', function ($query) use ($search) {
+                            $query->whereLike('title', "%{$search}%");
+                        });
+
+                        $query->orWhereHas('barter_invoice.barter_services', function ($query) use ($search) {
+                            $query->whereLike('title', "%{$search}%");
+                        });
+
+                        $query->orWhereHas('barter_acquirer', function ($query) use ($search) {
+                            $query->whereLike('name', "%{$search}%");
+                        });
+
+                        $query->orWhereHas('barter_provider', function ($query) use ($search) {
+                            $query->whereLike('name', "%{$search}%");
+                        });
+
+                        $query->orWhereHas('barter_remarks', function ($query) use ($search) {
+                            $query->whereLike('address', "%{$search}%")
+                                ->orWhereLike('deliverables', "%{$search}%")
+                                ->orWhereLike('note', "%{$search}%");
+                        });
+
+                        if (isset($datetime)) {
+                            $query->orWhereHas('barter_remarks', function ($query) use ($datetime) {
+                                $query->where('datetime', $datetime->toDateTimeString())
+                                    ->orWhereDate('datetime', $datetime->toDateString())
+                                    ->orWhereTime('datetime', $datetime->toTimeString());
+                            });
+                        }
+                    });
+                })
                 ->when($barter_service_id, function ($query) use ($barter_service_id) {
                     $query->where('barter_service_id', $barter_service_id);
                 })

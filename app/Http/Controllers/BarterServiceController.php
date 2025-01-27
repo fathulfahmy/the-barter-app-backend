@@ -30,22 +30,21 @@ class BarterServiceController extends BaseController
     {
         try {
             $mode = $request->input('mode');
-            $search = $request->input('search');
+            $search = trim($request->input('search'));
             $categories = $request->input('categories', []);
 
             $query = BarterService::query()
-                ->when(! empty($search), function ($query) use ($search) {
+                ->when($search && $search !== '', function ($query) use ($search) {
                     $query->where(function ($query) use ($search) {
-                        $query->where('title', 'like', "%{$search}%")
-                            ->orWhere('description', 'like', "%{$search}%")
-                            ->orWhere('min_price', 'like', "%{$search}%")
-                            ->orWhere('max_price', 'like', "%{$search}%")
-                            ->orWhere('price_unit', 'like', "%{$search}%")
+                        $query->whereLike('title', "%{$search}%")
+                            ->orWhereLike('min_price', "%{$search}%")
+                            ->orWhereLike('max_price', "%{$search}%")
+                            ->orWhereLike('price_unit', "%{$search}%")
                             ->orWhereHas('barter_provider', function ($query) use ($search) {
-                                $query->where('name', 'like', "%{$search}%");
+                                $query->whereLike('name', "%{$search}%");
                             })
                             ->orWhereHas('barter_category', function ($query) use ($search) {
-                                $query->where('name', 'like', "%{$search}%");
+                                $query->whereLike('name', "%{$search}%");
                             });
                     });
                 })

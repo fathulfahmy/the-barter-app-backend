@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use GetStream\StreamChat\Client;
 
 class BaseController extends Controller
@@ -73,5 +74,48 @@ class BaseController extends Controller
         $chat_token = $chat_client->createToken((string) $user_id);
 
         return $chat_token;
+    }
+
+    public function parseSearchDate($input)
+    {
+        try {
+            Carbon::setLocale('en'); // Ensure proper month parsing
+            $now = now()->setTimezone('Asia/Kuala_Lumpur');
+
+            // Day and Month (e.g., "27 Jan")
+            if (preg_match('/^\d{1,2} [a-zA-Z]+$/', $input)) {
+                return Carbon::createFromFormat('d M Y', "{$input} ".$now->format('Y'), 'Asia/Kuala_Lumpur');
+            }
+
+            // Day and Year (e.g., "27 2024")
+            if (preg_match('/^\d{1,2} \d{4}$/', $input)) {
+                return Carbon::createFromFormat('d M Y', "{$input} ".$now->format('M'), 'Asia/Kuala_Lumpur');
+            }
+
+            // Month and Year (e.g., "Jan 2024")
+            if (preg_match('/^[a-zA-Z]+ \d{4}$/', $input)) {
+                return Carbon::createFromFormat('d M Y', "01 {$input}", 'Asia/Kuala_Lumpur');
+            }
+
+            // Just Day (e.g., "27")
+            if (is_numeric($input)) {
+                return Carbon::createFromFormat('d M Y', "{$input} ".$now->format('M Y'), 'Asia/Kuala_Lumpur');
+            }
+
+            // Just Month (e.g., "Jan")
+            if (preg_match('/^[a-zA-Z]+$/', $input)) {
+                return Carbon::createFromFormat('d M Y', "01 {$input} ".$now->format('Y'), 'Asia/Kuala_Lumpur');
+            }
+
+            // Just Year (e.g., "2024")
+            if (preg_match('/^\d{4}$/', $input)) {
+                return Carbon::createFromFormat('Y-m-d', "{$input}-01-01", 'Asia/Kuala_Lumpur');
+            }
+
+            // Default: Parse the input directly
+            return Carbon::parse($input, 'Asia/Kuala_Lumpur');
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
